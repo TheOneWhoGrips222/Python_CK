@@ -12,19 +12,19 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
-<<<<<<< HEAD
+
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Question, Answer, Report, Tag, Vote
-=======
-from .models import Question, Answer, Tag
+
+
+from .models import Question, Answer, Tag , Vote,Report
 from django.db.models import Count
 from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .ai_search import find_similar_questions_ai
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+
 
 User = get_user_model()
 
@@ -154,13 +154,11 @@ def add_question(request):
 
     return render(request, 'app/AddQuestion.html')
 
-<<<<<<< HEAD
 
-=======
 def tags_view(request):
     tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')
     return render(request, 'app/tag.html', {'tags': tags})
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+
 
 def users_view(request):
     users = User.objects.all()
@@ -215,7 +213,7 @@ def question_page(request):
 
     return render(request, 'app/question-list.html',context)
 
-<<<<<<< HEAD
+
 @staff_member_required(login_url='login')
 def admin_dashboard(request):
 
@@ -282,7 +280,7 @@ def toggle_active(request, user_id):
 
 
 
-=======
+
 def search_similar_questions(request):
     """API trả về JSON danh sách câu hỏi tương tự cho tính năng Autocomplete"""
     query = request.GET.get('q', '')
@@ -301,7 +299,7 @@ def search_similar_questions(request):
 
 # Yêu cầu đăng nhập
 @login_required
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+
 def accept_answer(request, id):
     # Lấy câu trả lời theo id
     answer = get_object_or_404(Answer, id=id)
@@ -319,35 +317,25 @@ def accept_answer(request, id):
     question.save()
     return redirect('question_detail', id=question.id)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 def search_similar_questions(request):
     """API trả về JSON danh sách câu hỏi tương tự dùng AI"""
     query = request.GET.get('q', '')
 
-<<<<<<< HEAD
-    if len(query) >= 2:
-=======
+
     if len(query) > 5:
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+
         # Lấy tất cả câu hỏi để so sánh
         all_questions = list(Question.objects.all().order_by('-creation_date')[:500])
 
         # Gọi hàm AI xử lý
-<<<<<<< HEAD
+
         ai_results = find_similar_questions_ai(query, all_questions, top_k=5, threshold=0.5)
 
         results = []
         for item in ai_results:
 
-=======
-        ai_results = find_similar_questions_ai(query, all_questions, top_k=5, threshold=0.4)
 
-        results = []
-        for item in ai_results:
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             q = item['question']
             similarity_percent = round(item['score'] * 100)
 
@@ -358,44 +346,4 @@ def search_similar_questions(request):
                 'similarity': similarity_percent
             })
         return JsonResponse({'results': results})
-<<<<<<< HEAD
-    return JsonResponse({'results': []})
 
-def manage_account(request):
-    return render(request, 'app/ManageUser.html')
-
-def tag (request):
-    return render(request, 'app/tag.html')
-
-
-def update_user_reputation(user):
-
-    question_score = Question.objects.filter(own_user=user).aggregate(total=Sum('score'))['total'] or 0
-    reputation_from_questions = question_score * 5
-
-
-    answer_score = Answer.objects.filter(own_user=user).aggregate(total=Sum('score'))['total'] or 0
-    reputation_from_answers = answer_score * 10
-
-
-    accepted_count = Answer.objects.filter(own_user=user, is_accepted=True).count()
-    reputation_bonus = accepted_count * 15
-
-
-    total_reputation = reputation_from_questions + reputation_from_answers + reputation_bonus
-
-
-    user.reputation = total_reputation
-    user.save()
-    return total_reputation
-
-
-@login_required
-def refresh_reputation_view(request):
-
-    new_score = update_user_reputation(request.user)
-    messages.success(request, f"Điểm uy tín của bạn đã được cập nhật: {new_score}")
-    return redirect('user_profile', username=request.user.username)
-=======
-    return JsonResponse({'results': []})
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237

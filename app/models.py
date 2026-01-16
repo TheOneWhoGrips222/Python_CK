@@ -115,8 +115,6 @@ class Report(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-<<<<<<< HEAD
+
         return f"Report by {self.own_user}"
-=======
-        return f"Report by {self.own_user}"
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+
