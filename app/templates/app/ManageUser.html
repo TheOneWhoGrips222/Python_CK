@@ -12,11 +12,22 @@
 
 <nav class="navbar">
     <div class="nav-container">
+<<<<<<< HEAD
         <a href="{% url 'home' %}" class="logo"> <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
+=======
+        <a href="{% url 'home' %}" class="logo">DevCommunity</a>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
         <div class="search-bar">
             <i class="fas fa-search" style="color: #888;"></i>
             <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
             <div id="global-search-results" class="nav-search-results"></div>
+<<<<<<< HEAD
+=======
+        </div>
+        <div class="user-actions">
+            <a href="{% url 'add_question' %}" class="btn btn-primary">Đặt câu hỏi</a>
+            <div class="user-avatar-placeholder">{{ request.user.username|slice:":1"|upper }}</div>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
         </div>
  <div class="user-actions">
                 {% if request.user.is_authenticated %}
@@ -83,12 +94,17 @@
                 <span class="label">Câu hỏi</span>
             </div>
             <div class="stat-box">
+<<<<<<< HEAD
                 <span class="value" style="color: #2e7d32;"><i class="fa-regular fa-thumbs-up"></i> {{ profile_user.likes_count }}</span>
                 <span class="label">Lượt Thích</span>
             </div>
             <div class="stat-box">
                 <span class="value" style="color: #d32f2f;"><i class="fa-regular fa-thumbs-down"></i> {{ profile_user.dislikes_count }}</span>
                 <span class="label">Không thích</span>
+=======
+                <span class="value" style="color: var(--green-success);">0</span>
+                <span class="label">Lượt Thích</span>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             </div>
         </div>
 
@@ -102,13 +118,20 @@
                         <div class="q-meta">Đã hỏi: {{ q.creation_date|date:"H:i d/m/Y" }} • {{ q.view_count }} lượt xem</div>
                     </div>
                     <div class="q-score-box">
+<<<<<<< HEAD
                         <i class="fa-solid fa-ranking-star" style="color: #6a737c; font-size: 0.8rem; display: block; margin-bottom: 2px;"></i>
+=======
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                         <span class="value">{{ q.score }}</span>
                         <div class="label">Điểm</div>
                     </div>
                 </div>
                 {% empty %}
+<<<<<<< HEAD
                 <p style="padding: 20px;">Thành viên này chưa có câu hỏi nào.</p>
+=======
+                <p>Thành viên này chưa có câu hỏi nào.</p>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                 {% endfor %}
             </div>
         </section>
@@ -121,7 +144,11 @@
         </div>
     </aside>
 </div>
+<<<<<<< HEAD
 
 <script src="{% static 'app/js/ai_search.js' %}"></script>
+=======
+{% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 </body>
 </html>

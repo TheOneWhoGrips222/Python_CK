@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('global-search-input');
     const searchResults = document.getElementById('global-search-results');
@@ -79,4 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
             searchResults.style.display = 'block';
         }
     });
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237

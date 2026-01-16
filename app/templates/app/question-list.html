@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>Tất cả câu hỏi - DevCommunity</title>
+=======
+    <title>Q&A Community Platform</title>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
     {% load static %}
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+<<<<<<< HEAD
 
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -151,5 +156,120 @@
         }
     });
 </script>
+=======
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">DevCommunity</a>
+            <div class="search-bar">
+                <i class="fas fa-search" style="color: #888;"></i>
+                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
+                <div id="global-search-results" class="nav-search-results"></div>
+            </div>
+            <div class="user-actions">
+                <a href="{% url 'add_question' %}" class="btn-primary">Đặt câu hỏi</a>
+                <div class="user-avatar-placeholder">A</div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <nav class="left-sidebar">
+            <ul class="nav-links">
+                <li>
+                    <a href="#" class="nav-item">Trang chủ</a>
+                </li>
+                <li>
+                    <div class="nav-section-title">PUBLIC</div>
+                    <ul class="sub-nav">
+                        <li>
+                            <a href="#" class="nav-item active">
+                                <i class="fa-solid fa-earth-americas"></i> Questions
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'tags' %}" class="nav-item">Tags</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users' %}" class="nav-item">Users</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="nav-section-title">COLLECTIVES</div>
+                    <ul class="sub-nav">
+                        <li><a href="#" class="nav-item">Khám phá</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content-area">
+        {%for q in questions%}
+            <article class="post-card question-card">
+                <div class="post-header">
+                    <div class="author-info">
+                        <div class="avatar">N</div>
+                        <div class="meta">
+                            <span class="author-name">{{q.own_user.username}}</span>
+                            <span class="post-date">{{q.creation_date}}</span>
+                        </div>
+                    </div>
+                    <button class="btn-icon" title="Báo cáo vi phạm">
+                        <i class="fa-regular fa-flag"></i>
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <h1 class="post-title">{{q.title}}</h1>
+                    <div class="post-body">
+                        {{ q.body|safe }}
+
+                    </div>
+                    <div class="tags-container">
+                        {% for tag in q.tags.all %}
+                        <span class="tag">{{tag.name}}</span>
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="post-footer">
+                    <div class="evaluation-group">
+                        <span class ="count"> Score: {{q.score}}</span>
+                    </div>
+                    <div class="post-stats">
+                        <span><i class="fa-regular fa-eye"></i> 120 Lượt xem</span>
+                        <span><i class="fa-regular fa-comment"></i> 1 Trả lời</span>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+
+            </section>
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="widget">
+                <h4>Thẻ nổi bật</h4>
+                <div class="tags-cloud">
+
+                    <span class="tag">javascript</span>
+                    <span class="tag">python</span>
+                    <span class="tag">java</span>
+                </div>
+            </div>
+            <div class="widget">
+                <h4>Thống kê</h4>
+                <ul class="stats-list">
+                    <li><span>Thành viên:</span> <strong>{{user_count}}</strong></li>
+                    <li><span>Câu hỏi:</span> <strong>{{question_count}}</strong></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 </body>
 </html>

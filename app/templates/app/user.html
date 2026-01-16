@@ -14,12 +14,17 @@
 
     <nav class="navbar">
         <div class="nav-container">
+<<<<<<< HEAD
             <a href="{% url 'home' %}" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
+=======
+            <a href="{% url 'home' %}" class="logo">DevCommunity</a>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             <div class="search-bar">
                 <i class="fas fa-search" style="color: #888;"></i>
                 <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
                 <div id="global-search-results" class="nav-search-results"></div>
             </div>
+<<<<<<< HEAD
              <div class="user-actions">
                 {% if request.user.is_authenticated %}
                     <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
@@ -29,6 +34,14 @@
                 {% else %}
                     <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
                     <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
+=======
+            <div class="user-actions">
+                <a href="{% url 'add_question' %}" class="btn btn-primary">Đặt câu hỏi</a>
+                {% if request.user.is_authenticated %}
+                 <div class="user-avatar-placeholder">{{ request.user.username|slice:":1"|upper }}</div>
+                {% else %}
+                 <a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập</a>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                 {% endif %}
             </div>
         </div>
@@ -42,6 +55,7 @@
                     <a href="{% url 'home' %}" class="nav-item">Trang chủ</a>
                 </li>
                 <li>
+<<<<<<< HEAD
                     <div class="nav-section-title">Cộng đồng </div>
                     <ul class="sub-nav">
                         <li>
@@ -72,6 +86,21 @@
                 </li>
                         {% endif %}
 
+=======
+                    <div class="nav-section-title">PUBLIC</div>
+                    <ul class="sub-nav">
+                        <li>
+                            <a href="{% url 'home' %}" class="nav-item">
+                                <i class="fa-solid fa-earth-americas"></i> Questions
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'tags' %}" class="nav-item">Tags</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users' %}" class="nav-item active">Users</a>
+                        </li>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                     </ul>
                 </li>
             </ul>
@@ -89,7 +118,11 @@
                     <div class="user-name">
                         <a href="{% url 'user_profile' u.username %}" style="color: inherit; text-decoration: none;">{{ u.username }}</a>
                     </div>
+<<<<<<< HEAD
 
+=======
+                    <div class="user-location"><i class="fa-solid fa-location-dot"></i> Vietnam</div>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                     <div class="user-stats">{{ u.reputation }} Điểm Uy Tín</div>
                 </div>
                 {% endfor %}
@@ -110,4 +143,8 @@
     {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237

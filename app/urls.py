@@ -36,6 +36,7 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),
 
+<<<<<<< HEAD
     path('admin-dashboard/',views.admin_dashboard, name='admin_dashboard'),
     path('delete-question/<int:id>/', views.delete_question, name='delete_question'),
     path('admin-users/', views.admin_users, name='admin_users'),
@@ -47,4 +48,9 @@ urlpatterns = [
     path('account/',views.manage_account,name='manage_account'),
     path('tag/',views.tag,name='tag'),
 
+=======
+    path('api/search_similar/', views.search_similar_questions, name='search_similar_questions'),
+
+    path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 ]

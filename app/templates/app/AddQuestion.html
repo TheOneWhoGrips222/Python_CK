@@ -6,10 +6,13 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<<<<<<< HEAD
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+=======
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 
     <style>
         .suggestions-box {
@@ -17,12 +20,20 @@
             background: white;
             border: 1px solid #d6d9dc;
             border-top: none;
+<<<<<<< HEAD
             width: 100%; 
+=======
+            width: 100%; /* Bằng chiều rộng input */
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+<<<<<<< HEAD
             display: none; 
+=======
+            display: none; /* Mặc định ẩn */
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             border-radius: 0 0 4px 4px;
         }
 
@@ -61,12 +72,15 @@
             border-radius: 3px;
             font-size: 11px;
         }
+<<<<<<< HEAD
 
         /* Tùy chỉnh chiều cao editor */
         #editor {
             height: 350px;
             font-size: 15px;
         }
+=======
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
     </style>
 </head>
 <body>
@@ -100,9 +114,18 @@
 
                 <div class="form-group" style="margin-bottom: 20px; position: relative;">
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Tiêu đề</label>
+<<<<<<< HEAD
                     <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
                            placeholder="Ví dụ: Làm sao để chuyển String thành Int trong Python?" required
                            style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px;">
+=======
+                    <small style="display: block; margin-bottom: 8px; color: #6a737c;">Hãy cụ thể và hình dung như bạn đang hỏi một người khác.</small>
+
+                    <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
+                           placeholder="Ví dụ: Làm sao để chuyển String thành Int trong Python?" required
+                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px;">
+
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                     <div id="suggestions" class="suggestions-box"></div>
                 </div>
 
@@ -138,13 +161,18 @@
                     <li>Tóm tắt vấn đề ở tiêu đề</li>
                     <li>Mô tả chi tiết lỗi gặp phải</li>
                     <li>Thêm code minh họa nếu có</li>
+<<<<<<< HEAD
                     <li>Bấm nút <strong>f(x)</strong> để nhập toán học</li>
+=======
+                    <li>Kiểm tra xem câu hỏi đã tồn tại chưa</li>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                 </ul>
             </div>
         </div>
 
     </div>
 
+<<<<<<< HEAD
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
         // --- 1. KHỞI TẠO EDITOR (CÔNG CỤ SOẠN THẢO & TOÁN HỌC) ---
@@ -175,26 +203,51 @@
         };
 
         // --- 2. GIỮ NGUYÊN LOGIC TÌM KIẾM AI CỦA BẠN ---
+=======
+    <script>
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
         const titleInput = document.getElementById('id_title');
         const suggestionsBox = document.getElementById('suggestions');
         let timeout = null;
 
         titleInput.addEventListener('input', function() {
             const query = this.value;
+<<<<<<< HEAD
             clearTimeout(timeout);
+=======
+
+            // Xóa timeout cũ để tránh gọi API liên tục (Debounce)
+            clearTimeout(timeout);
+
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             if (query.length < 3) {
                 suggestionsBox.style.display = 'none';
                 return;
             }
+<<<<<<< HEAD
+=======
+
+            // Đợi 300ms sau khi ngừng gõ mới gọi API
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             timeout = setTimeout(() => {
                 fetch(`{% url 'search_similar_questions' %}?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
+<<<<<<< HEAD
                         suggestionsBox.innerHTML = '';
                         if (data.results.length > 0) {
                             const header = document.createElement('div');
                             header.style.padding = '8px 12px';
                             header.style.background = '#e1ecf4';
+=======
+                        suggestionsBox.innerHTML = ''; // Xóa gợi ý cũ
+
+                        if (data.results.length > 0) {
+                            // Tiêu đề phụ
+                            const header = document.createElement('div');
+                            header.style.padding = '8px 12px';
+                            header.style.background = '#e1ecf4'; // Màu xanh nhẹ cảnh báo
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                             header.style.color = '#39739d';
                             header.style.fontSize = '13px';
                             header.innerHTML = '<i class="fas fa-robot"></i> AI tìm thấy câu hỏi tương tự:';
@@ -224,6 +277,10 @@
             }, 300);
         });
 
+<<<<<<< HEAD
+=======
+        // Ẩn gợi ý khi click ra ngoài
+>>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
         document.addEventListener('click', function(e) {
             if (e.target !== titleInput && !suggestionsBox.contains(e.target)) {
                 suggestionsBox.style.display = 'none';
