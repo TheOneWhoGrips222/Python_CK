@@ -19,7 +19,8 @@
 
             <div class="search-bar">
                 <i class="fas fa-search" style="color: #888;"></i>
-                <input type="text" placeholder="Tìm kiếm câu hỏi...">
+                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
+                <div id="global-search-results" class="nav-search-results"></div>
             </div>
 
             <div class="user-actions">
@@ -49,56 +50,93 @@
                 <li class="nav-section-title">Cộng đồng</li>
 
                 <li>
-                    <a href="{% url 'home' %}" class="nav-item">
+                    <a href="{% url 'quest-page' %}" class="nav-item">
                         <i class="fas fa-globe-americas fa-sm"></i> Câu hỏi
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'tags' %}" class="nav-item" style="padding-left: 30px;">Tags</a>
+                    <a href="{% url 'tag' %}" class="nav-item" style="padding-left: 30px;">Tags</a>
                 </li>
                 <li>
                     <a href="{% url 'users' %}" class="nav-item" style="padding-left: 30px;">Thành viên</a>
                 </li>
+
+                <li class="nav-section-title">Quản lý</li>
+                {% if request.user.is_staff %}
+                <li>
+
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
+                    </a>
+
+                      </li>
+                 {% endif %}
+                 {% if request.user.is_authenticated %}
+                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
+                        <i class="fas fa-user"></i> Quản lý Tài Khoản
+                    </a>
+                </li>
+                {% endif %}
+
+                </ul>
             </ul>
         </div>
 
         <div class="main-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h1 style="font-size: 1.7rem; font-weight: 500;">Câu hỏi hàng đầu</h1>
-                <a href="{% url 'add_question' %}" class="btn-primary">Đặt câu hỏi</a>
+
             </div>
 
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 15px; border-bottom: 1px solid #e3e6e8;">
-                <div class="filter-tabs" style="display: flex; gap: 5px;">
-                    <button style="padding: 10px; background: #e3e6e8; border: none; font-weight: 600;">Mới nhất</button>
-                    <button style="padding: 10px; background: transparent; border: none; color: #6a737c;">Nổi bật</button>
-                    <button style="padding: 10px; background: transparent; border: none; color: #6a737c;">Xem nhiều</button>
-                </div>
-            </div>
+   <div style="display: flex; justify-content: flex-end; margin-bottom: 15px; border-bottom: 1px solid #e3e6e8;">
+    <div class="filter-tabs" style="display: flex; gap: 5px;">
+
+        <a href="?sort=newest" style="padding: 10px; text-decoration: none; border: none; font-weight: 600; font-size: 13px;
+            background: {% if current_sort == 'newest' or not current_sort %}#e3e6e8{% else %}transparent{% endif %};
+            color: {% if current_sort == 'newest' or not current_sort %}#0c0d0e{% else %}#6a737c{% endif %};">
+            Mới nhất
+        </a>
+
+        <a href="?sort=hot" style="padding: 10px; text-decoration: none; border: none; font-weight: 600; font-size: 13px;
+            background: {% if current_sort == 'hot' %}#e3e6e8{% else %}transparent{% endif %};
+            color: {% if current_sort == 'hot' %}#0c0d0e{% else %}#6a737c{% endif %};">
+            Nổi bật
+        </a>
+
+        <a href="?sort=views" style="padding: 10px; text-decoration: none; border: none; font-weight: 600; font-size: 13px;
+            background: {% if current_sort == 'views' %}#e3e6e8{% else %}transparent{% endif %};
+            color: {% if current_sort == 'views' %}#0c0d0e{% else %}#6a737c{% endif %};">
+            Xem nhiều
+        </a>
+
+    </div>
+</div>
 
             {% for question in questions %}
             <div class="post-card" style="display: flex; gap: 15px; padding: 12px;">
                 <div class="post-stats" style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px; min-width: 60px; font-size: 13px; color: #6a737c;">
-                    <div style="color: #0c0d0e; font-weight: 500;">{{ question.score }} <span style="font-weight: 400;">phiếu</span></div>
-                    <div style="{% if question.AnswerCount > 0 %}border: 1px solid #5eba7d; color: #5eba7d;{% endif %} padding: 2px 4px; border-radius: 3px;">
-                        <strong>{{ question.AnswerCount }}</strong> trả lời
+                    <div style="color: #0c0d0e; font-weight: 500;">{{ question.score }} <span style="font-weight: 400;">điểm</span></div>
+
+                    <div style="{% if question.answers.count > 0 %}border: 1px solid #5eba7d; color: #5eba7d;{% endif %} padding: 2px 4px; border-radius: 3px;">
+                        <strong>{{ question.answers.count }}</strong> trả lời
                     </div>
-                    <div>{{ question.ViewCount|default:"0" }} xem</div>
+
+                    <div>{{ question.view_count|default:"0" }} xem</div>
                 </div>
 
                 <div class="post-details" style="flex: 1;">
                     <h3 class="post-title" style="margin: 0 0 5px 0; font-size: 1.1rem;">
-                        <a href="{% url 'question_detail' question.id %}" style="color: #0074cc;">{{ question.Title }}</a>
+                        <a href="{% url 'question_detail' question.id %}" style="color: #0074cc;">{{ question.title }}</a>
                     </h3>
 
                     <p class="post-excerpt" style="font-size: 13px; color: #3b4045; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                        {{ question.Body|striptags }}
+                        {{ question.body|striptags }}
                     </p>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
                         <div class="tags-container" style="margin: 0;">
-                            {% for tag_item in question.questions.all %}
-                                <span class="tag">{{ tag_item.tag_id.id }}</span>
+                            {% for tag in question.tags.all %}
+                                <span class="tag">{{ tag.name }}</span>
                             {% empty %}
                                 <span class="tag">python</span>
                                 <span class="tag">django</span>
@@ -107,8 +145,8 @@
 
                         <div class="author-info" style="font-size: 12px; color: #6a737c;">
                             <span class="avatar" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; background-color: #0074cc;"></span>
-                            <a href="{% url 'user_profile' question.OwnUser.username %}" style="color: #0074cc; margin-left: 3px;">{{ question.OwnUser.username }}</a>
-                            <span style="color: #525960;">đã hỏi {{ question.CreationDate|date:"d/m/Y" }}</span>
+                            <a href="{% url 'user_profile' question.own_user.username %}" style="color: #0074cc; margin-left: 3px;">{{ question.own_user.username }}</a>
+                            <span style="color: #525960;">đã hỏi {{ question.creation_date|date:"d/m/Y" }}</span>
                         </div>
                     </div>
                 </div>
@@ -160,6 +198,6 @@
         </div>
 
     </div>
-
+    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 </html>

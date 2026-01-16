@@ -1,118 +1,113 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users - Thành viên Cộng đồng</title>
-
+    {% load static %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../../static/app/css/style.css">
-    <link rel="stylesheet" href="../../static/app/css/user.css">
+    <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'app/css/user.css' %}">
 </head>
 <body>
 
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="#" class="logo">DevCommunity</a>
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Tìm kiếm câu hỏi...">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
+            <div class="search-bar">
+                <i class="fas fa-search" style="color: #888;"></i>
+                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
+                <div id="global-search-results" class="nav-search-results"></div>
+            </div>
+             <div class="user-actions">
+                {% if request.user.is_authenticated %}
+                    <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
+                        Đăng xuất
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
+                {% endif %}
+            </div>
         </div>
-        <div class="user-actions">
-            <button class="btn btn-primary">Đặt câu hỏi</button>
-            <div class="user-avatar-placeholder">A</div>
-        </div>
-    </div>
-</nav>
-
-<div class="main-container">
-
-    <nav class="left-sidebar">
-        <ul class="nav-links">
-            <li>
-                <a href="{% url 'home' %}" class="nav-item">Trang chủ</a>
-            </li>
-            <li>
-                <div class="nav-section-title">PUBLIC</div>
-                <ul class="sub-nav">
-                    <li>
-                        <a href="{% url 'home' %}" class="nav-item">
-                            <i class="fa-solid fa-earth-americas"></i> Questions
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'tags' %}" class="nav-item">Tags</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'users' %}" class="nav-item active">Users</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
     </nav>
 
-    <main class="content-area">
+    <div class="main-container">
 
-        <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thành viên Cộng đồng</h1>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Danh sách các thành viên tích cực và uy tín trong cộng đồng.</p>
+        <nav class="left-sidebar">
+            <ul class="nav-links">
+                <li>
+                    <a href="{% url 'home' %}" class="nav-item">Trang chủ</a>
+                </li>
+                <li>
+                    <div class="nav-section-title">Cộng đồng </div>
+                    <ul class="sub-nav">
+                        <li>
+                            <a href="{% url 'quest-page' %}" class="nav-item">
+                                <i class="fa-solid fa-earth-americas"></i> Câu hỏi
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'tag' %}" class="nav-item">Tags</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'users' %}" class="nav-item active">Thành viên</a>
+                        </li>
+                                     <li class="nav-section-title">Quản lý</li>
+                {% if request.user.is_staff %}
+                <li>
 
-        <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Tìm kiếm theo tên hoặc vị trí...">
-        </div>
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
+                    </a>
 
-        <div class="users-grid">
+                      </li>
+                 {% endif %}
+                         {% if request.user.is_authenticated %}
+                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
+                        <i class="fas fa-user"></i> Quản lý Tài Khoản
+                    </a>
+                </li>
+                        {% endif %}
 
-            <div class="user-card">
-                <div class="user-avatar" style="background: #e74c3c;">A</div>
-                <div class="user-name">Anh Tuan</div>
-                <div class="user-location"><i class="fa-solid fa-location-dot"></i> Hà Nội, Việt Nam</div>
-                <div class="user-stats">850 Điểm Uy Tín</div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-avatar" style="background: #2ecc71;">M</div>
-                <div class="user-name">Minh Le</div>
-                <div class="user-location"><i class="fa-solid fa-location-dot"></i> Đà Nẵng, Việt Nam</div>
-                <div class="user-stats">1,200 Điểm Uy Tín</div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-avatar" style="background: #f1c40f; color: #333;">T</div>
-                <div class="user-name">Thao Pham</div>
-                <div class="user-location"><i class="fa-solid fa-location-dot"></i> TP. Hồ Chí Minh</div>
-                <div class="user-stats">420 Điểm Uy Tín</div>
-            </div>
-
-            <div class="user-card">
-                <div class="user-avatar" style="background: #9b59b6;">H</div>
-                <div class="user-name">Hoang Nguyen</div>
-                <div class="user-location"><i class="fa-solid fa-location-dot"></i> Hải Phòng</div>
-                <div class="user-stats">1,580 Điểm Uy Tín</div>
-            </div>
-
-        </div>
-
-    </main>
-
-    <aside class="right-sidebar">
-        <div class="widget">
-            <h4>Thẻ nổi bật</h4>
-            <div class="tags-cloud">
-                <span class="tag">javascript</span>
-                <span class="tag">python</span>
-                <span class="tag">java</span>
-            </div>
-        </div>
-        <div class="widget">
-            <h4>Thống kê Cộng đồng</h4>
-            <ul class="stats-list">
-                <li><span>Thành viên:</span> <strong>1,205</strong></li>
-                <li><span>Câu hỏi:</span> <strong>450</strong></li>
+                    </ul>
+                </li>
             </ul>
-        </div>
-    </aside>
+        </nav>
 
-</div>
+        <main class="content-area">
+
+            <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thành viên Cộng đồng</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Danh sách các thành viên tích cực và uy tín trong cộng đồng.</p>
+
+            <div class="users-grid">
+                {% for u in users %}
+                <div class="user-card">
+                    <div class="user-avatar" style="background: #0074cc;">{{ u.username|slice:":1"|upper }}</div>
+                    <div class="user-name">
+                        <a href="{% url 'user_profile' u.username %}" style="color: inherit; text-decoration: none;">{{ u.username }}</a>
+                    </div>
+
+                    <div class="user-stats">{{ u.reputation }} Điểm Uy Tín</div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="widget">
+                <h4>Thống kê Cộng đồng</h4>
+                <ul class="stats-list">
+                    <li><span>Thành viên:</span> <strong>{{ users|length }}</strong></li>
+                </ul>
+            </div>
+        </aside>
+
+    </div>
+    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
+
 </html>

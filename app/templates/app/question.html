@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>{{ question.Title }} - DevCommunity</title>
+    <title>{{ question.title }} - DevCommunity</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -17,15 +17,19 @@
 
             <div class="search-bar">
                 <i class="fas fa-search" style="color: #888;"></i>
-                <input type="text" placeholder="Tìm kiếm...">
+                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
+                <div id="global-search-results" class="nav-search-results"></div>
             </div>
 
-            <div class="user-actions">
+                      <div class="user-actions">
                 {% if request.user.is_authenticated %}
-                    <span>{{ request.user.username }}</span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background-color: #dc2626;">Đăng xuất</a>
+                    <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
+                        Đăng xuất
+                    </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary">Đăng nhập</a>
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
                 {% endif %}
             </div>
         </div>
@@ -37,19 +41,35 @@
             <ul class="nav-links">
                 <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
                 <li class="nav-section-title">Cộng đồng</li>
-                <li><a href="#" class="nav-item active">Câu hỏi</a></li>
-                <li><a href="#" class="nav-item">Tags</a></li>
-                <li><a href="#" class="nav-item">Thành viên</a></li>
+                <li><a href="{% url 'home' %}" class="nav-item active">Câu hỏi</a></li>
+                <li><a href="{% url 'tag' %}" class="nav-item">Tags</a></li>
+                <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
+                 <li class="nav-section-title">Quản lý</li>
+                {% if request.user.is_staff %}
+                <li>
+
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
+                    </a>
+
+                      </li>
+                 {% endif %}
+                 {% if request.user.is_authenticated %}
+                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
+                        <i class="fas fa-user"></i> Quản lý Tài Khoản
+                    </a>
+                </li>
+                {% endif %}
             </ul>
         </div>
 
         <div class="main-content">
 
             <div class="post-header">
-                <h1 style="font-size: 1.6rem; margin-bottom: 10px;">{{ question.Title }}</h1>
+                <h1 style="font-size: 1.6rem; margin-bottom: 10px;">{{ question.title }}</h1>
                 <div style="font-size: 13px; color: #6a737c; padding-bottom: 15px; border-bottom: 1px solid #e3e6e8;">
-                    <span>Đã hỏi <strong>{{ question.CreationDate|date:"d/m/Y" }}</strong></span>
-                    <span style="margin-left: 15px;">Người hỏi <strong>{{ question.OwnUser.username }}</strong></span>
+                    <span>Đã hỏi <strong>{{ question.creation_date|date:"d/m/Y" }}</strong></span>
+                    <span style="margin-left: 15px;">Người hỏi <strong>{{ question.own_user.username }}</strong></span>
                 </div>
             </div>
 
@@ -62,12 +82,12 @@
 
                 <div class="post-body" style="flex: 1;">
                     <div style="font-size: 15px; line-height: 1.6; margin-bottom: 20px;">
-                        {{ question.Body|linebreaks }}
+                        {{ question.body|linebreaks }}
                     </div>
 
                     <div class="tags-container">
-                        {% for tag_item in question.questions.all %}
-                            <span class="tag">{{ tag_item.tag_id.id }}</span>
+                        {% for tag in question.tags.all %}
+                            <span class="tag">{{ tag.name }}</span>
                         {% empty %}
                             <span class="tag">general</span>
                         {% endfor %}
@@ -81,36 +101,62 @@
                 {% for answer in question.answers.all %}
                 <div class="post-card" style="margin-top: 15px; border: none; border-bottom: 1px solid #e3e6e8; border-radius: 0;">
                     <div style="display: flex; gap: 20px;">
-                        <div style="width: 40px; text-align: center;">
-                            <i class="fas fa-caret-up fa-2x" style="color: #babfc4;"></i>
-                            <div style="font-weight: bold; font-size: 1.2rem;">{{ answer.AnswerScore }}</div>
-                            <i class="fas fa-caret-down fa-2x" style="color: #babfc4;"></i>
-                        </div>
+
+                        <div style="width: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                            <i class="fas fa-caret-up fa-2x" style="color: #babfc4; cursor: pointer;"></i>
+                            <div style="font-weight: bold; font-size: 1.2rem; color: #6a737c;">{{ answer.score }}</div>
+                            <i class="fas fa-caret-down fa-2x" style="color: #babfc4; cursor: pointer;"></i>
+
+                            {% if request.user == question.own_user %}
+                                <form action="{% url 'accept_answer' answer.id %}" method="post" style="margin-top: 10px;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0;">
+                                        {% if question.accepted_answer == answer %}
+                                            <i class="fas fa-check fa-2x" style="color: #2e7d32;" title="Bỏ chấp nhận câu trả lời này"></i>
+                                        {% else %}
+                                            <i class="fas fa-check fa-2x" style="color: #babfc4; opacity: 0.5;" title="Chấp nhận câu trả lời này"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            {% else %}
+                                {% if question.accepted_answer == answer %}
+                                    <div style="margin-top: 10px;">
+                                        <i class="fas fa-check fa-2x" style="color: #2e7d32;" title="Người hỏi đã chấp nhận câu trả lời này"></i>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            </div>
 
                         <div style="flex: 1;">
-                            {{ answer.AnswerBody|linebreaks }}
+                            {{ answer.body|linebreaks }}
 
                             <div style="margin-top: 15px; font-size: 12px; color: #6a737c; text-align: right;">
-                                Trả lời bởi <a href="#">{{ answer.OwnUser.username }}</a> vào {{ answer.AnswerDate|date:"H:i d/m/Y" }}
+                                Trả lời bởi <a href="{% url 'user_profile' answer.own_user.username %}">{{ answer.own_user.username }}</a> vào {{ answer.creation_date|date:"H:i d/m/Y" }}
                             </div>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                    <p style="margin-top: 20px; color: #6a737c;">Chưa có câu trả lời nào. Hãy là người đầu tiên giúp đỡ!</p>
-                {% endfor %}
+                    {% endfor %}
             </div>
 
             <div style="margin-top: 40px; background: #fdf7e2; padding: 20px; border-radius: 8px; border: 1px solid #f1e5bc;">
-                <h4>Câu trả lời của bạn</h4>
-                {% if request.user.is_authenticated %}
-                    <form method="post">
-                        {% csrf_token %}
-                        <textarea name="content" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;" required placeholder="Viết câu trả lời tại đây..."></textarea>
-                        <button type="submit" class="btn-primary" style="margin-top: 10px;">Gửi câu trả lời</button>
-                    </form>
+                {% if question.accepted_answer %}
+                    <div style="text-align: center; color: #2e7d32;">
+                        <h3><i class="fas fa-check-circle"></i> Câu hỏi đã được giải quyết</h3>
+                        <p>Chủ câu hỏi đã chấp nhận một câu trả lời. Không thể gửi thêm câu trả lời mới.</p>
+                    </div>
                 {% else %}
-                    <p>Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để trả lời.</p>
+                    <h4>Câu trả lời của bạn</h4>
+                    {% if request.user.is_authenticated %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <textarea name="content" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;" required placeholder="Viết câu trả lời tại đây..."></textarea>
+                            <button type="submit" class="btn-primary" style="margin-top: 10px;">Gửi câu trả lời</button>
+                        </form>
+                    {% else %}
+                        <p>Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để trả lời.</p>
+                    {% endif %}
                 {% endif %}
             </div>
 
@@ -121,11 +167,11 @@
                 <h4 style="margin-bottom: 10px;">Câu hỏi liên quan</h4>
                 <ul style="list-style: none; padding: 0; font-size: 13px;">
                     <li style="margin-bottom: 8px;"><a href="#" style="color: #0074cc;">Làm sao để center div?</a></li>
-                    <li style="margin-bottom: 8px;"><a href="#" style="color: #0074cc;">Lỗi Python import error</a></li>
                 </ul>
             </div>
         </div>
 
     </div>
+    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 </html>

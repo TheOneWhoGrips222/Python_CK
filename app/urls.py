@@ -14,7 +14,7 @@ urlpatterns = [
     path('quest/', views.question_page, name="quest-page"),
     path('question/<int:id>/', views.question_detail, name='question_detail'),
     path('ask/', views.add_question, name='add_question'),
-    path('tags/', views.tags_view, name='tags'),
+
     path('users/', views.users_view, name='users'),
     path('user/<str:username>/', views.user_profile, name='user_profile'),
 
@@ -35,4 +35,16 @@ urlpatterns = [
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),
+
+    path('admin-dashboard/',views.admin_dashboard, name='admin_dashboard'),
+    path('delete-question/<int:id>/', views.delete_question, name='delete_question'),
+    path('admin-users/', views.admin_users, name='admin_users'),
+    path('toggle-staff/<int:user_id>/', views.toggle_staff, name='toggle_staff'),
+    path('toggle-active/<int:user_id>/', views.toggle_active, name='toggle_active'),
+    path('api/search_similar/', views.search_similar_questions, name='search_similar_questions'),
+
+    path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
+    path('account/',views.manage_account,name='manage_account'),
+    path('tag/',views.tag,name='tag'),
+
 ]

@@ -1,8 +1,21 @@
+from datetime import date
+from urllib import request
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from django.http import JsonResponse
+from .ai_search import find_similar_questions_ai
+from django.shortcuts import redirect, get_object_or_404
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
-from .models import Question, Answer
+from django.urls import reverse
+from django.utils import timezone
+
+from .models import Question, Answer, Report, Tag, Vote
 
 User = get_user_model()
 
@@ -13,10 +26,26 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ("username", "email")
 
+
 def home(request):
-    questions = Question.objects.all().order_by('-creation_date')
+
+    sort = request.GET.get('sort', 'newest')
+
+    questions = Question.objects.all()
+
+    if sort == 'hot':
+
+        questions = questions.order_by('-score', '-creation_date')
+    elif sort == 'views':
+
+        questions = questions.order_by('-view_count', '-creation_date')
+    else:
+
+        questions = questions.order_by('-creation_date')
+
     context = {
-        'questions': questions
+        'questions': questions,
+        'current_sort': sort
     }
     return render(request, 'app/home.html', context)
 
@@ -57,6 +86,10 @@ def question_detail(request, id):
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
+
+        if question.accepted_answer:
+            return redirect('question_detail', id=id)
+
         content = request.POST.get('content')
         if content:
             Answer.objects.create(
@@ -67,40 +100,97 @@ def question_detail(request, id):
             return redirect('question_detail', id=id)
     return render(request, 'app/question.html', {'question': question})
 
+@login_required(login_url='login')
 def add_question(request):
+    # 1. Kiểm tra đăng nhập
     if not request.user.is_authenticated:
         return redirect('login')
+
     if request.method == 'POST':
         title = request.POST.get('title')
         body = request.POST.get('body')
+        tag_data = request.POST.get('tags')
+
         if title and body:
-            Question.objects.create(
+
+            question = Question.objects.create(
                 title=title,
                 body=body,
-                own_user=request.user
+                own_user=request.user,
+                creation_date= timezone.now()
             )
-            return redirect('home')
+
+
+            if tag_data:
+
+                tag_list = [t.strip().lower() for t in tag_data.replace(',', ' ').split() if t.strip()]
+
+                raw_string = ""
+
+                for tag_name in tag_list[:5]:
+
+                    tag_obj, created = Tag.objects.get_or_create(name=tag_name)
+
+
+                    question.tags.add(tag_obj)
+
+
+                    raw_string += f"<{tag_name}>"
+
+                # 4. Cập nhật lại trường tags_raw vào câu hỏi
+                question.tags_raw = raw_string
+                question.save()
+
+            return redirect('quest-page')
+
     return render(request, 'app/AddQuestion.html')
 
-def tags_view(request):
-    return render(request, 'app/tag.html')
+
 
 def users_view(request):
     users = User.objects.all()
     context = {'users': users}
     return render(request, 'app/user.html', context)
 
+@login_required(login_url='login')
 def user_profile(request, username):
-    user = get_object_or_404(User, username=username)
-    user_questions = Question.objects.filter(own_user=user).order_by('-creation_date')
+    # Lấy thông tin user dựa trên username từ URL
+    profile_user = get_object_or_404(User, username=username)
+
+    # --- TÍNH TOÁN ĐIỂM ---
+
+    q_score_sum = Question.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
+
+
+    a_score_sum = Answer.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
+
+    # Tính tổng Reputation
+    profile_user.reputation = (q_score_sum * 5) + (a_score_sum * 10)
+
+
+
+    likes = Vote.objects.filter(question__own_user=profile_user, value=1).count() + \
+            Vote.objects.filter(answer__own_user=profile_user, value=1).count()
+
+    dislikes = Vote.objects.filter(question__own_user=profile_user, value=-1).count() + \
+               Vote.objects.filter(answer__own_user=profile_user, value=-1).count()
+
+
+    profile_user.likes_count = likes
+    profile_user.dislikes_count = dislikes
+    profile_user.save()
+
+    # Lấy danh sách câu hỏi của user này
+    user_questions = Question.objects.filter(own_user=profile_user).order_by('-creation_date')
+
     context = {
-        'profile_user': user,
-        'user_questions': user_questions
+        'profile_user': profile_user,
+        'user_questions': user_questions,
     }
     return render(request, 'app/ManageUser.html', context)
 
 def question_page(request):
-    questions = Question.objects.all().order_by('creation_date').prefetch_related('tags')
+    questions = Question.objects.all().order_by('-creation_date').prefetch_related('tags')
     user_count = User.objects.all().count()
     question_count = Question.objects.all().count()
     context = {'questions': questions,
@@ -109,3 +199,149 @@ def question_page(request):
                }
 
     return render(request, 'app/question-list.html',context)
+
+@staff_member_required(login_url='login')
+def admin_dashboard(request):
+
+    questions = Question.objects.all().order_by('-creation_date')[:10]
+    user_count = User.objects.all().count()
+    question_count = Question.objects.all().count()
+    answer_count = Answer.objects.all().count()
+    report_count = Report.objects.all().count()
+    context = {'questions': questions,
+               'user_count': user_count,
+               'question_count': question_count,
+               'answer_count': answer_count,
+               'report_count': report_count
+               }
+    return render(request, 'app/admin.html',context)
+
+def delete_question(request, id):
+    Question.objects.filter(id=id).delete()
+    return redirect('admin_dashboard')
+
+
+def admin_users(request):
+
+    noi_dung_tim_kiem = request.GET.get('search', '')
+
+
+    list_user = User.objects.all()
+
+
+    if noi_dung_tim_kiem != "":
+        context = {
+            'users': list_user,
+
+        }
+        list_user = list_user.filter(username__icontains=noi_dung_tim_kiem)
+
+
+    return render(request, 'app/admin_user.html', {'users': list_user})
+
+def toggle_staff(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+
+    if user.is_staff == True:
+        user.is_staff = False
+        messages.success(request, f"Đã hạ cấp quyền Staff của {user.username}")
+    else:
+        user.is_staff = True
+        messages.success(request, f"Đã thăng cấp {user.username} lên làm Staff")
+
+    user.save()
+    return redirect('admin_users')
+
+def toggle_active(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if user.is_active:
+        user.is_active = False
+        messages.warning(request, f"Đã khóa tài khoản {user.username}")
+    else:
+        user.is_active = True
+        messages.success(request, f"Đã mở khóa tài khoản {user.username}")
+    user.save()
+    return redirect('admin_users')
+
+
+
+def accept_answer(request, id):
+    # Lấy câu trả lời theo id
+    answer = get_object_or_404(Answer, id=id)
+    question = answer.question
+
+    # Kiểm tra bảo mật: chỉ người tạo câu hỏi mới được quyền chấp nhận
+    if request.user != question.own_user:
+        return redirect('question_detail', id=question.id)
+
+    if question.accepted_answer == answer:
+        question.accepted_answer = None
+    else:
+        question.accepted_answer = answer
+
+    question.save()
+    return redirect('question_detail', id=question.id)
+
+
+def search_similar_questions(request):
+    """API trả về JSON danh sách câu hỏi tương tự dùng AI"""
+    query = request.GET.get('q', '')
+
+    if len(query) >= 2:
+        # Lấy tất cả câu hỏi để so sánh
+        all_questions = list(Question.objects.all().order_by('-creation_date')[:500])
+
+        # Gọi hàm AI xử lý
+        ai_results = find_similar_questions_ai(query, all_questions, top_k=5, threshold=0.5)
+
+        results = []
+        for item in ai_results:
+
+            q = item['question']
+            similarity_percent = round(item['score'] * 100)
+
+            results.append({
+                'title': q.title,
+                'url': reverse('question_detail', args=[q.id]),
+                'answers': q.answers.count(),
+                'similarity': similarity_percent
+            })
+        return JsonResponse({'results': results})
+    return JsonResponse({'results': []})
+
+def manage_account(request):
+    return render(request, 'app/ManageUser.html')
+
+def tag (request):
+    return render(request, 'app/tag.html')
+
+
+def update_user_reputation(user):
+
+    question_score = Question.objects.filter(own_user=user).aggregate(total=Sum('score'))['total'] or 0
+    reputation_from_questions = question_score * 5
+
+
+    answer_score = Answer.objects.filter(own_user=user).aggregate(total=Sum('score'))['total'] or 0
+    reputation_from_answers = answer_score * 10
+
+
+    accepted_count = Answer.objects.filter(own_user=user, is_accepted=True).count()
+    reputation_bonus = accepted_count * 15
+
+
+    total_reputation = reputation_from_questions + reputation_from_answers + reputation_bonus
+
+
+    user.reputation = total_reputation
+    user.save()
+    return total_reputation
+
+
+@login_required
+def refresh_reputation_view(request):
+
+    new_score = update_user_reputation(request.user)
+    messages.success(request, f"Điểm uy tín của bạn đã được cập nhật: {new_score}")
+    return redirect('user_profile', username=request.user.username)

@@ -1,3 +1,4 @@
+
 /* --- BIẾN MÀU SẮC & CẤU HÌNH CHUNG --- */
 :root {
     --primary-color: #2563eb;       /* Xanh dương chủ đạo */
@@ -73,6 +74,7 @@ button {
     display: flex;
     align-items: center;
     width: 40%;
+    position: relative;
 }
 
 .search-bar input {
@@ -81,6 +83,53 @@ button {
     outline: none;
     margin-left: 0.5rem;
     width: 100%;
+}
+
+.nav-search-results {
+    position: absolute;
+    top: 100%; /* Hiện ngay bên dưới thanh tìm kiếm */
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #d6d9dc;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 9999;
+    display: none; /* Mặc định ẩn */
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 8px; /* Cách ra một chút cho đẹp */
+}
+
+.nav-search-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eff0f1;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left; /* Căn trái văn bản */
+}
+
+.nav-search-item:hover {
+    background-color: #f1f2f3;
+}
+
+.nav-search-item:last-child {
+    border-bottom: none;
+}
+
+.nav-item-title {
+    color: #0074cc;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.nav-item-meta {
+    font-size: 12px;
+    color: #6a737c;
+    display: flex;
+    justify-content: space-between;
 }
 
 .user-actions {
@@ -491,3 +540,40 @@ code {
     color: var(--primary-color);
     font-weight: 600;
 }
+#similarity-alert {
+        display: none;
+        background-color: #fdf2f2;
+        border: 1px solid #f8b4b4;
+        color: #9b1c1c;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .similar-link {
+        display: block;
+        margin-top: 5px;
+        color: #0074cc;
+        text-decoration: underline;
+    }
+    .btn-disabled {
+        background-color: #babfc4 !important;
+        cursor: not-allowed !important;
+    }
+            .ql-container {
+            font-size: 16px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .ql-editor {
+            min-height: 250px;
+        }
+
+        .ql-editor.ql-blank::before {
+            color: #aeb3b9;
+            font-style: italic;
+            pointer-events: none;
+        }
+
+        .ql-formula {
+            font-family: 'KaTeX_Main', serif;
+        }

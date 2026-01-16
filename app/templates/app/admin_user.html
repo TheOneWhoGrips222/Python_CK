@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - DevCommunity ADMIN (Trang tĩnh)</title>
+     {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
+        <div class="user-actions">
+            <span class="admin-name">Xin chào, Quản trị viên</span>
+            <div class="user-avatar-placeholder">AD</div>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    <nav class="left-sidebar">
+        <ul class="nav-links">
+            <li><a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> Tổng quan</a></li>
+            <li>
+                <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
+                <ul class="sub-nav">
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="#" class="nav-item active"><i class="fa-solid fa-users"></i> Người dùng</a></li>
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="content-area">
+
+
+        <div class="admin-card">
+            <div class="card-header">
+                <h3>Danh sách thành viên</h3>
+                <form action="#" class="search-box">
+                    <input type="text" placeholder="Tìm username..." value="">
+                    <button type="button"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
+            </div>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người dùng</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for i in users %}
+                            <td>#{{i.id}}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="user-cell" style="background: #eee; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold;">A</span>
+                                    <strong>{{i.username}}</strong>
+                                </div>
+                            </td>
+                            <td>{{i.email}}</td>
+                            <td>
+                                {% if u.is_superuser %}
+                                  <span class="badge gold">Admin tối cao</span>
+                                {% elif u.is_staff %}
+                                 <span class="badge blue">Staff</span>
+                                {% else %}
+                                 <span class="badge grey">Thành viên</span>
+                                {% endif %}
+
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                <span class="text-success"><i class="fa-solid fa-check"></i> Hoạt động</span>
+                                {% else %}
+                                  <span class="text-danger"><i class="fa-solid fa-lock"></i> Đã khóa</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if not u.is_superuser %}
+            <a href="{% url 'toggle_staff' i.id %}" class="action-btn">
+                {% if u.is_staff %}
+                    <i class="fa-solid fa-user-minus" style="color: orange;"></i>
+                {% else %}
+                    <i class="fa-solid fa-user-shield" style="color: blue;"></i>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'toggle_active' i.id %}" class="action-btn">
+                {% if u.is_active %}
+                    <i class="fa-solid fa-lock" style="color: red;"></i>
+                {% else %}
+                    <i class="fa-solid fa-lock-open" style="color: green;"></i>
+                {% endif %}
+            </a>
+        {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

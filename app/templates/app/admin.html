@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DevCommunity</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
+        <div class="user-actions">
+            <span class="admin-name">Xin chào, Quản trị viên</span>
+            <div class="user-avatar-placeholder">AD</div>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    <nav class="left-sidebar">
+        <ul class="nav-links">
+            <li>
+                <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                    <i class="fa-solid fa-chart-line"></i> Tổng quan
+                </a>
+            </li>
+            <li>
+                <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
+                <ul class="sub-nav">
+                    <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                </ul>
+            </li>
+            <li>
+                <div class="nav-section-title">HỆ THỐNG</div>
+                <ul class="sub-nav">
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Cài đặt</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="content-area">
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="icon-wrap blue"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-detail">
+                    <p>Người dùng</p>
+                    <h3>{{user_count}}</h3>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="icon-wrap orange"><i class="fa-solid fa-question"></i></div>
+                <div class="stat-detail">
+                    <p>Câu hỏi</p>
+                    <h3>{{question_count}}</h3>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="icon-wrap green"><i class="fa-solid fa-comments"></i></div>
+                <div class="stat-detail">
+                    <p>Trả lời</p>
+                    <h3>{{answer_count}}</h3>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="icon-wrap red"><i class="fa-solid fa-circle-exclamation"></i></div>
+                <div class="stat-detail">
+                    <p>Báo cáo mới</p>
+                    <h3>{{report_count}}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="card-header">
+                <h3>Câu hỏi mới nhất</h3>
+
+            </div>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người đăng</th>
+                            <th>Tiêu đề</th>
+                            <th>Ngày tạo</th>
+
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for q in questions %}
+                        <tr>
+
+                            <td>#{{q.id}}</td>
+                            <td><span class="user-cell"></span> <strong>{{q.own_user.username}}</strong></td>
+                            <td><div class="truncate">{{q.title}}</div></td>
+                            <td>{{q.creation_date}}</td>
+
+                            <td>
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                               <a href="{% url 'delete_question' q.id %}"
+                                 class="action-btn text-danger"
+                                 onclick="return confirm('chắc chắn muốn xóa câu hỏi này không?')">
+                                <i class="fa-solid fa-trash"></i>
+                               </a>
+                            </td>
+                        </tr>
+                    {% endfor%}
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
