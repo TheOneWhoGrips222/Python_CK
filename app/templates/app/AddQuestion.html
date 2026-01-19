@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <title>Đặt câu hỏi - DevCommunity</title>
     {% load static %}
+
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<<<<<<< HEAD
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
-=======
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 
     <style>
         .suggestions-box {
@@ -20,20 +19,12 @@
             background: white;
             border: 1px solid #d6d9dc;
             border-top: none;
-<<<<<<< HEAD
-            width: 100%; 
-=======
-            width: 100%; /* Bằng chiều rộng input */
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            width: 100%;
             max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-<<<<<<< HEAD
-            display: none; 
-=======
-            display: none; /* Mặc định ẩn */
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            display: none;
             border-radius: 0 0 4px 4px;
         }
 
@@ -46,24 +37,10 @@
             align-items: center;
         }
 
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item:hover {
-            background-color: #f8f9f9;
-        }
-
-        .suggestion-title {
-            color: #0074cc;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .suggestion-meta {
-            font-size: 12px;
-            color: #6a737c;
-        }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background-color: #f8f9f9; }
+        .suggestion-title { color: #0074cc; font-size: 14px; font-weight: 500; }
+        .suggestion-meta { font-size: 12px; color: #6a737c; }
 
         .has-answer {
             background-color: #e1ecf4;
@@ -72,40 +49,36 @@
             border-radius: 3px;
             font-size: 11px;
         }
-<<<<<<< HEAD
 
         /* Tùy chỉnh chiều cao editor */
         #editor {
             height: 350px;
             font-size: 15px;
         }
-=======
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
     </style>
 </head>
 <body>
 
-    <div class="navbar">
+    <nav class="navbar">
         <div class="nav-container">
             <a href="{% url 'home' %}" class="logo">
                 <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
             </a>
-<div class="user-actions">
+            <div class="user-actions">
                 {% if request.user.is_authenticated %}
                     <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; text-decoration: none; padding: 5px 10px; border-radius: 4px;">
                         Đăng xuất
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng ký</a>
                 {% endif %}
             </div>
         </div>
-    </div>
+    </nav>
 
     <div class="main-container">
-
         <div class="main-content" style="grid-column: 1 / span 2;">
             <h1 style="margin-bottom: 30px;">Đặt một câu hỏi công khai</h1>
 
@@ -114,24 +87,15 @@
 
                 <div class="form-group" style="margin-bottom: 20px; position: relative;">
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Tiêu đề</label>
-<<<<<<< HEAD
-                    <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
-                           placeholder="Ví dụ: Làm sao để chuyển String thành Int trong Python?" required
-                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px;">
-=======
                     <small style="display: block; margin-bottom: 8px; color: #6a737c;">Hãy cụ thể và hình dung như bạn đang hỏi một người khác.</small>
-
                     <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
                            placeholder="Ví dụ: Làm sao để chuyển String thành Int trong Python?" required
-                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px;">
-
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px; box-sizing: border-box;">
                     <div id="suggestions" class="suggestions-box"></div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Nội dung chi tiết</label>
-                    
                     <div id="editor-wrapper" style="background: white;">
                         <div id="editor"></div>
                     </div>
@@ -140,61 +104,49 @@
 
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Thẻ (Tags)</label>
-                    <small style="display: block; margin-bottom: 8px; color: #6a737c;">
-                        Thêm tối đa 5 thẻ để mô tả câu hỏi của bạn. Ví dụ: (python django javascript)
-                    </small>
-                    <div class="tag-input-container" style="border: 1px solid #babfc4; border-radius: 4px; padding: 5px; background: white; display: flex; flex-wrap: wrap; align-items: center;">
-                        <input type="text" name="tags" id="tag-input" placeholder="Nhấn Space hoặc Phẩy để ngăn cách các thẻ..."
-                               style="border: none; outline: none; padding: 8px; flex: 1; min-width: 200px; font-size: 14px;">
-                    </div>
-                    <small id="tag-help" style="color: #d0393e; display: none; margin-top: 5px;">Bạn chỉ có thể nhập tối đa 5 thẻ.</small>
+                    <small style="display: block; margin-bottom: 8px; color: #6a737c;">Thêm tối đa 5 thẻ để mô tả câu hỏi của bạn.</small>
+                    <input type="text" name="tags" id="tag-input" class="form-control" placeholder="Ví dụ: python django javascript"
+                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px; box-sizing: border-box;">
                 </div>
 
-                <button type="submit" class="btn-primary">Đăng câu hỏi</button>
+                <button type="submit" class="btn-primary" style="padding: 10px 20px; border-radius: 4px; cursor: pointer;">Đăng câu hỏi</button>
             </form>
         </div>
 
         <div class="right-sidebar">
-            <div class="widget" style="background-color: #fdf7e2; border: 1px solid #f1e5bc;">
+            <div class="widget" style="background-color: #fdf7e2; border: 1px solid #f1e5bc; padding: 15px; border-radius: 4px;">
                 <h4 style="margin-bottom: 15px;">Làm sao để có câu hỏi tốt?</h4>
                 <ul style="padding-left: 20px; font-size: 13px; line-height: 1.5;">
                     <li>Tóm tắt vấn đề ở tiêu đề</li>
                     <li>Mô tả chi tiết lỗi gặp phải</li>
                     <li>Thêm code minh họa nếu có</li>
-<<<<<<< HEAD
                     <li>Bấm nút <strong>f(x)</strong> để nhập toán học</li>
-=======
-                    <li>Kiểm tra xem câu hỏi đã tồn tại chưa</li>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                 </ul>
             </div>
         </div>
-
     </div>
 
-<<<<<<< HEAD
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
-        // --- 1. KHỞI TẠO EDITOR (CÔNG CỤ SOẠN THẢO & TOÁN HỌC) ---
+        // --- 1. KHỞI TẠO QUILL EDITOR ---
         const quill = new Quill('#editor', {
             theme: 'snow',
             modules: {
                 toolbar: [
                     ['bold', 'italic', 'underline'],
-                    ['code-block', 'formula'], // Nút công thức toán f(x)
+                    ['code-block', 'formula'],
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     ['link', 'clean']
                 ]
-            },
-
+            }
         });
 
-        // Đưa dữ liệu từ Editor vào Form trước khi gửi
+        // Đưa dữ liệu từ Editor vào Hidden Input trước khi submit
         const form = document.getElementById('question-form');
         form.onsubmit = function() {
             const bodyInput = document.getElementById('bodyInput');
-            bodyInput.value = quill.root.innerHTML; // Lấy HTML để lưu vào database
-            
+            bodyInput.value = quill.root.innerHTML;
+
             if(quill.getText().trim().length === 0) {
                 alert("Vui lòng nhập nội dung chi tiết!");
                 return false;
@@ -202,52 +154,29 @@
             return true;
         };
 
-        // --- 2. GIỮ NGUYÊN LOGIC TÌM KIẾM AI CỦA BẠN ---
-=======
-    <script>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+        // --- 2. LOGIC TÌM KIẾM AI (GỢI Ý TIÊU ĐỀ) ---
         const titleInput = document.getElementById('id_title');
         const suggestionsBox = document.getElementById('suggestions');
         let timeout = null;
 
         titleInput.addEventListener('input', function() {
             const query = this.value;
-<<<<<<< HEAD
-            clearTimeout(timeout);
-=======
-
-            // Xóa timeout cũ để tránh gọi API liên tục (Debounce)
             clearTimeout(timeout);
 
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             if (query.length < 3) {
                 suggestionsBox.style.display = 'none';
                 return;
             }
-<<<<<<< HEAD
-=======
 
-            // Đợi 300ms sau khi ngừng gõ mới gọi API
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             timeout = setTimeout(() => {
                 fetch(`{% url 'search_similar_questions' %}?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
                     .then(data => {
-<<<<<<< HEAD
                         suggestionsBox.innerHTML = '';
-                        if (data.results.length > 0) {
+                        if (data.results && data.results.length > 0) {
                             const header = document.createElement('div');
                             header.style.padding = '8px 12px';
                             header.style.background = '#e1ecf4';
-=======
-                        suggestionsBox.innerHTML = ''; // Xóa gợi ý cũ
-
-                        if (data.results.length > 0) {
-                            // Tiêu đề phụ
-                            const header = document.createElement('div');
-                            header.style.padding = '8px 12px';
-                            header.style.background = '#e1ecf4'; // Màu xanh nhẹ cảnh báo
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
                             header.style.color = '#39739d';
                             header.style.fontSize = '13px';
                             header.innerHTML = '<i class="fas fa-robot"></i> AI tìm thấy câu hỏi tương tự:';
@@ -258,8 +187,8 @@
                                 div.className = 'suggestion-item';
                                 div.innerHTML = `
                                     <div>
-                                        <div style="color: #0074cc; font-weight: 500;">${item.title}</div>
-                                        <div style="font-size: 11px; color: #6a737c;">
+                                        <div class="suggestion-title">${item.title}</div>
+                                        <div class="suggestion-meta">
                                             Độ giống: <b>${item.similarity}%</b>
                                             ${item.answers > 0 ? ` • <span class="has-answer">${item.answers} trả lời</span>` : ''}
                                         </div>
@@ -273,14 +202,10 @@
                             suggestionsBox.style.display = 'none';
                         }
                     })
-                    .catch(error => console.error('Lỗi:', error));
+                    .catch(error => console.error('Lỗi search:', error));
             }, 300);
         });
 
-<<<<<<< HEAD
-=======
-        // Ẩn gợi ý khi click ra ngoài
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
         document.addEventListener('click', function(e) {
             if (e.target !== titleInput && !suggestionsBox.contains(e.target)) {
                 suggestionsBox.style.display = 'none';
