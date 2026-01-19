@@ -347,3 +347,27 @@ def search_similar_questions(request):
             })
         return JsonResponse({'results': results})
 
+
+@login_required
+def manage_account(request):
+
+    user = request.user
+
+
+    user_questions = Question.objects.filter(own_user=user).order_by('-creation_date')
+
+
+    if request.method == 'POST':
+
+        new_email = request.POST.get('email')
+        if new_email:
+            user.email = new_email
+            user.save()
+            messages.success(request, "Cập nhật thông tin thành công!")
+            return redirect('manage_account')
+
+    context = {
+        'profile_user': user,
+        'user_questions': user_questions,
+    }
+    return render(request, 'app/ManageUser.html', context)

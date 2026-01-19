@@ -5,41 +5,30 @@
     <title>Hồ sơ cá nhân - {{ profile_user.username }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     {% load static %}
-    <link rel="stylesheet" href="{% static 'app/css/ManageUser.css' %}">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'app/css/ManageUser.css' %}">
 </head>
 <body>
 
 <nav class="navbar">
     <div class="nav-container">
-<<<<<<< HEAD
-        <a href="{% url 'home' %}" class="logo"> <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
-=======
-        <a href="{% url 'home' %}" class="logo">DevCommunity</a>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+        <a href="{% url 'home' %}" class="logo">
+            <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
+        </a>
         <div class="search-bar">
             <i class="fas fa-search" style="color: #888;"></i>
             <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
             <div id="global-search-results" class="nav-search-results"></div>
-<<<<<<< HEAD
-=======
         </div>
         <div class="user-actions">
-            <a href="{% url 'add_question' %}" class="btn btn-primary">Đặt câu hỏi</a>
-            <div class="user-avatar-placeholder">{{ request.user.username|slice:":1"|upper }}</div>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            {% if request.user.is_authenticated %}
+                <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
+                <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng xuất</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng nhập</a>
+                <a href="{% url 'register' %}" class="btn-primary" style="padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng ký</a>
+            {% endif %}
         </div>
- <div class="user-actions">
-                {% if request.user.is_authenticated %}
-                    <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
-                        Đăng xuất
-                    </a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
-                {% endif %}
-            </div>
     </div>
 </nav>
 
@@ -48,107 +37,90 @@
         <ul class="nav-links">
             <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
             <li>
-                <div class="nav-section-title">PUBLIC</div>
+                <div class="nav-section-title">Cộng đồng</div>
                 <ul class="sub-nav">
-                    <li><a href="{% url 'quest-page' %}" class="nav-item"><i class="fa-solid fa-earth-americas"></i> Questions</a></li>
-                    <li><a href="{% url 'tag' %}" class="nav-item">Tags</a></li>
-                    <li><a href="{% url 'users' %}" class="nav-item active">Thành viên </a></li>
+                    <li><a href="{% url 'quest-page' %}" class="nav-item"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
+                    <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
                 </ul>
             </li>
-             <li class="nav-section-title">Quản lý</li>
-                {% if request.user.is_staff %}
-                <li>
 
-                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
-                    </a>
-
-                      </li>
-                 {% endif %}
-                 {% if request.user.is_authenticated %}
-                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
-                        <i class="fas fa-user"></i> Quản lý Tài Khoản
-                    </a>
-                </li>
-                {% endif %}
+            {% if request.user.is_authenticated %}
+            <li>
+                <div class="nav-section-title">Quản lý</div>
+                <ul class="sub-nav">
+                    <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>
+                    {% if request.user.is_staff %}
+                    <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
         </ul>
     </nav>
 
     <main class="content-area">
-        <section class="profile-header">
-            <div class="profile-avatar">{{ profile_user.username|slice:":1"|upper }}</div>
+        <section class="profile-header" style="display: flex; align-items: center; gap: 20px; background: white; padding: 25px; border-radius: 8px; border: 1px solid #e3e6e8; margin-bottom: 20px;">
+            <div class="profile-avatar" style="background: #0074cc; color: white; width: 100px; height: 100px; line-height: 100px; border-radius: 8px; text-align: center; font-size: 3rem; font-weight: bold;">
+                {{ profile_user.username|slice:":1"|upper }}
+            </div>
             <div class="user-main-info">
-                <h1>{{ profile_user.username }}</h1>
-                <div class="reputation-badge">
+                <h1 style="margin: 0; font-size: 2rem;">{{ profile_user.username }}</h1>
+                <div class="reputation-badge" style="margin: 10px 0;">
                     <i class="fa-solid fa-award" style="color: #ffca28;"></i>
-                    <span>{{ profile_user.reputation }}</span>
-                    <span class="reputation-label">Điểm uy tín</span>
+                    <span style="font-weight: bold;">{{ profile_user.reputation|default:0 }}</span>
+                    <span class="reputation-label" style="color: #6a737c; font-size: 0.9rem;">Điểm uy tín</span>
                 </div>
-                <p class="post-date">Thành viên từ: {{ profile_user.date_joined|date:"d/m/Y" }}</p>
+                <p class="post-date" style="color: #6a737c; font-size: 0.9rem; margin: 0;">Thành viên từ: {{ profile_user.date_joined|date:"d/m/Y" }}</p>
             </div>
         </section>
 
-        <div class="user-stats-grid">
-            <div class="stat-box">
-                <span class="value">{{ user_questions.count }}</span>
-                <span class="label">Câu hỏi</span>
+        <div class="user-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+            <div class="stat-box" style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e3e6e8; text-align: center;">
+                <span class="value" style="display: block; font-size: 1.5rem; font-weight: bold;">{{ user_questions.count }}</span>
+                <span class="label" style="color: #6a737c; font-size: 0.85rem;">Câu hỏi</span>
             </div>
-            <div class="stat-box">
-<<<<<<< HEAD
-                <span class="value" style="color: #2e7d32;"><i class="fa-regular fa-thumbs-up"></i> {{ profile_user.likes_count }}</span>
-                <span class="label">Lượt Thích</span>
+            <div class="stat-box" style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e3e6e8; text-align: center;">
+                <span class="value" style="display: block; font-size: 1.5rem; font-weight: bold; color: #2e7d32;"><i class="fa-regular fa-thumbs-up"></i> {{ profile_user.likes_count|default:0 }}</span>
+                <span class="label" style="color: #6a737c; font-size: 0.85rem;">Lượt Thích</span>
             </div>
-            <div class="stat-box">
-                <span class="value" style="color: #d32f2f;"><i class="fa-regular fa-thumbs-down"></i> {{ profile_user.dislikes_count }}</span>
-                <span class="label">Không thích</span>
-=======
-                <span class="value" style="color: var(--green-success);">0</span>
-                <span class="label">Lượt Thích</span>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            <div class="stat-box" style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e3e6e8; text-align: center;">
+                <span class="value" style="display: block; font-size: 1.5rem; font-weight: bold; color: #d32f2f;"><i class="fa-regular fa-thumbs-down"></i> {{ profile_user.dislikes_count|default:0 }}</span>
+                <span class="label" style="color: #6a737c; font-size: 0.85rem;">Không thích</span>
             </div>
         </div>
 
-        <section class="post-card my-questions-section">
-            <h2>Câu hỏi đã đăng</h2>
+        <section class="post-card my-questions-section" style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e3e6e8;">
+            <h2 style="font-size: 1.3rem; border-bottom: 1px solid #e3e6e8; padding-bottom: 10px; margin-bottom: 15px;">Câu hỏi đã đăng</h2>
             <div class="q-list">
                 {% for q in user_questions %}
-                <div class="q-item">
+                <div class="q-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f2f3;">
                     <div class="q-info">
-                        <a href="{% url 'question_detail' q.id %}" class="q-title">{{ q.title }}</a>
-                        <div class="q-meta">Đã hỏi: {{ q.creation_date|date:"H:i d/m/Y" }} • {{ q.view_count }} lượt xem</div>
+                        <a href="{% url 'question_detail' q.id %}" class="q-title" style="color: #0074cc; text-decoration: none; font-weight: 500;">{{ q.title }}</a>
+                        <div class="q-meta" style="font-size: 0.8rem; color: #6a737c; margin-top: 5px;">
+                            Đã hỏi: {{ q.creation_date|date:"H:i d/m/Y" }} • {{ q.view_count }} lượt xem
+                        </div>
                     </div>
-                    <div class="q-score-box">
-<<<<<<< HEAD
-                        <i class="fa-solid fa-ranking-star" style="color: #6a737c; font-size: 0.8rem; display: block; margin-bottom: 2px;"></i>
-=======
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
-                        <span class="value">{{ q.score }}</span>
-                        <div class="label">Điểm</div>
+                    <div class="q-score-box" style="text-align: center; min-width: 60px;">
+                        <span class="value" style="font-weight: bold; color: #3b4045;">{{ q.score }}</span>
+                        <div class="label" style="font-size: 0.75rem; color: #6a737c;">Điểm</div>
                     </div>
                 </div>
                 {% empty %}
-<<<<<<< HEAD
-                <p style="padding: 20px;">Thành viên này chưa có câu hỏi nào.</p>
-=======
-                <p>Thành viên này chưa có câu hỏi nào.</p>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+                <p style="padding: 20px; color: #6a737c; text-align: center;">Thành viên này chưa có câu hỏi nào.</p>
                 {% endfor %}
             </div>
         </section>
     </main>
 
     <aside class="right-sidebar">
-        <div class="widget">
-            <h4>Thành tựu</h4>
-            <p style="font-size: 0.9rem; color: #6b7280;">Bạn đã đóng góp tích cực cho cộng đồng!</p>
+        <div class="widget" style="background: #fdf7e3; border: 1px solid #e6dbb9; padding: 15px; border-radius: 4px;">
+            <h4 style="margin-top: 0; color: #3b4045;">Thành tựu</h4>
+            <p style="font-size: 0.9rem; color: #6b7280;">Hệ thống huy hiệu đang được cập nhật!</p>
         </div>
     </aside>
 </div>
-<<<<<<< HEAD
 
 <script src="{% static 'app/js/ai_search.js' %}"></script>
-=======
-{% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 </body>
 </html>

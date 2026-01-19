@@ -45,12 +45,12 @@ urlpatterns = [
     path('api/search_similar/', views.search_similar_questions, name='search_similar_questions'),
 
     path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
-    path('account/',views.manage_account,name='manage_account'),
-    path('tag/',views.tag,name='tag'),
+    #path('account/',views.manage_account,name='manage_account'),
+    path('tags/',views.tags_view,name='tags'),
 
 
     path('api/search_similar/', views.search_similar_questions, name='search_similar_questions'),
 
     path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
-
+path('manage-account/', views.manage_account, name='manage_account'),
 ]

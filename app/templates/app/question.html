@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <div class="navbar">
+    <nav class="navbar">
         <div class="nav-container">
             <a href="{% url 'home' %}" class="logo">
                 <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
@@ -21,55 +21,47 @@
                 <div id="global-search-results" class="nav-search-results"></div>
             </div>
 
-                      <div class="user-actions">
+            <div class="user-actions">
                 {% if request.user.is_authenticated %}
                     <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
-                        Đăng xuất
-                    </a>
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng xuất</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng ký</a>
                 {% endif %}
             </div>
         </div>
-    </div>
+    </nav>
 
     <div class="main-container">
 
-        <div class="left-sidebar">
+        <nav class="left-sidebar">
             <ul class="nav-links">
                 <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
-                <li class="nav-section-title">Cộng đồng</li>
-                <li><a href="{% url 'home' %}" class="nav-item active">Câu hỏi</a></li>
-<<<<<<< HEAD
-                <li><a href="{% url 'tag' %}" class="nav-item">Tags</a></li>
-                <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
-                 <li class="nav-section-title">Quản lý</li>
-                {% if request.user.is_staff %}
                 <li>
+                    <div class="nav-section-title">Cộng đồng</div>
+                    <ul class="sub-nav">
+                        <li><a href="{% url 'quest-page' %}" class="nav-item active"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
+                        <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
+                        <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
+                    </ul>
+                </li>
 
-                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
-                    </a>
-
-                      </li>
-                 {% endif %}
-                 {% if request.user.is_authenticated %}
-                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
-                        <i class="fas fa-user"></i> Quản lý Tài Khoản
-                    </a>
+                {% if request.user.is_authenticated %}
+                <li>
+                    <div class="nav-section-title">Quản lý</div>
+                    <ul class="sub-nav">
+                        <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>
+                        {% if request.user.is_staff %}
+                        <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
                 {% endif %}
-=======
-                <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
-                <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             </ul>
-        </div>
+        </nav>
 
-        <div class="main-content">
-
+        <main class="main-content">
             <div class="post-header">
                 <h1 style="font-size: 1.6rem; margin-bottom: 10px;">{{ question.title }}</h1>
                 <div style="font-size: 13px; color: #6a737c; padding-bottom: 15px; border-bottom: 1px solid #e3e6e8;">
@@ -92,7 +84,7 @@
 
                     <div class="tags-container">
                         {% for tag in question.tags.all %}
-                            <span class="tag">{{ tag.name }}</span>
+                            <span class="tag" style="background: #e1ecf4; color: #39739d; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px;">{{ tag.name }}</span>
                         {% empty %}
                             <span class="tag">general</span>
                         {% endfor %}
@@ -101,12 +93,11 @@
             </div>
 
             <div style="margin-top: 40px;">
-                <h3>{{ question.answers.count }} Câu trả lời</h3>
+                <h3 style="border-bottom: 1px solid #e3e6e8; padding-bottom: 10px;">{{ question.answers.count }} Câu trả lời</h3>
 
                 {% for answer in question.answers.all %}
-                <div class="post-card" style="margin-top: 15px; border: none; border-bottom: 1px solid #e3e6e8; border-radius: 0;">
+                <div class="post-card" style="margin-top: 15px; border: none; border-bottom: 1px solid #e3e6e8; border-radius: 0; padding-bottom: 20px;">
                     <div style="display: flex; gap: 20px;">
-
                         <div style="width: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px;">
                             <i class="fas fa-caret-up fa-2x" style="color: #babfc4; cursor: pointer;"></i>
                             <div style="font-weight: bold; font-size: 1.2rem; color: #6a737c;">{{ answer.score }}</div>
@@ -123,60 +114,53 @@
                                         {% endif %}
                                     </button>
                                 </form>
-                            {% else %}
-                                {% if question.accepted_answer == answer %}
-                                    <div style="margin-top: 10px;">
-                                        <i class="fas fa-check fa-2x" style="color: #2e7d32;" title="Người hỏi đã chấp nhận câu trả lời này"></i>
-                                    </div>
-                                {% endif %}
+                            {% elif question.accepted_answer == answer %}
+                                <div style="margin-top: 10px;">
+                                    <i class="fas fa-check fa-2x" style="color: #2e7d32;" title="Người hỏi đã chấp nhận câu trả lời này"></i>
+                                </div>
                             {% endif %}
-                            </div>
+                        </div>
 
                         <div style="flex: 1;">
-                            {{ answer.body|linebreaks }}
-
+                            <div style="font-size: 15px; line-height: 1.6;">{{ answer.body|linebreaks }}</div>
                             <div style="margin-top: 15px; font-size: 12px; color: #6a737c; text-align: right;">
-                                Trả lời bởi <a href="{% url 'user_profile' answer.own_user.username %}">{{ answer.own_user.username }}</a> vào {{ answer.creation_date|date:"H:i d/m/Y" }}
+                                Trả lời bởi <a href="{% url 'user_profile' answer.own_user.username %}" style="color: #0074cc; text-decoration: none;">{{ answer.own_user.username }}</a> vào {{ answer.creation_date|date:"H:i d/m/Y" }}
                             </div>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                    {% endfor %}
+                {% endfor %}
             </div>
 
             <div style="margin-top: 40px; background: #fdf7e2; padding: 20px; border-radius: 8px; border: 1px solid #f1e5bc;">
                 {% if question.accepted_answer %}
                     <div style="text-align: center; color: #2e7d32;">
                         <h3><i class="fas fa-check-circle"></i> Câu hỏi đã được giải quyết</h3>
-                        <p>Chủ câu hỏi đã chấp nhận một câu trả lời. Không thể gửi thêm câu trả lời mới.</p>
+                        <p>Chủ câu hỏi đã chấp nhận một câu trả lời.</p>
                     </div>
                 {% else %}
                     <h4>Câu trả lời của bạn</h4>
                     {% if request.user.is_authenticated %}
                         <form method="post">
                             {% csrf_token %}
-                            <textarea name="content" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit;" required placeholder="Viết câu trả lời tại đây..."></textarea>
-                            <button type="submit" class="btn-primary" style="margin-top: 10px;">Gửi câu trả lời</button>
+                            <textarea name="content" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; box-sizing: border-box;" required placeholder="Viết câu trả lời tại đây..."></textarea>
+                            <button type="submit" class="btn-primary" style="margin-top: 10px; padding: 10px 20px; cursor: pointer;">Gửi câu trả lời</button>
                         </form>
                     {% else %}
                         <p>Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để trả lời.</p>
                     {% endif %}
                 {% endif %}
             </div>
+        </main>
 
-        </div>
-
-        <div class="right-sidebar">
-            <div class="widget">
-                <h4 style="margin-bottom: 10px;">Câu hỏi liên quan</h4>
-                <ul style="list-style: none; padding: 0; font-size: 13px;">
-                    <li style="margin-bottom: 8px;"><a href="#" style="color: #0074cc;">Làm sao để center div?</a></li>
-                </ul>
+        <aside class="right-sidebar">
+            <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0; margin-bottom: 10px;">Thông tin bổ sung</h4>
+                <p style="font-size: 13px; color: #6a737c;">Hãy nhớ tuân thủ quy tắc cộng đồng khi trả lời câu hỏi.</p>
             </div>
-        </div>
+        </aside>
 
     </div>
-    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
+    <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 </html>

@@ -3,42 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <title>Tất cả câu hỏi - DevCommunity</title>
-=======
-    <title>Q&A Community Platform</title>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
     {% load static %}
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
-<<<<<<< HEAD
 
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        .post-body {
-            line-height: 1.6;
-            font-size: 15px;
-            color: #3b4045;
-            word-wrap: break-word;
-        }
-        /* Reset cho Quill editor trong trang danh sách */
-        .ql-editor {
-            padding: 0 !important;
-            overflow: hidden;
-        }
-        .stat-link {
-            text-decoration: none;
-            color: inherit;
-            transition: 0.2s;
-        }
-        .stat-link:hover {
-            opacity: 0.7;
-        }
+        .post-body { line-height: 1.6; font-size: 15px; color: #3b4045; word-wrap: break-word; }
+        .ql-editor { padding: 0 !important; overflow: hidden; }
+        .stat-link { text-decoration: none; color: inherit; transition: 0.2s; }
+        .stat-link:hover { opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -70,8 +49,15 @@
                 <div class="nav-section-title">Cộng đồng</div>
                 <ul class="sub-nav">
                     <li><a href="{% url 'quest-page' %}" class="nav-item active"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
-                    <li><a href="{% url 'tag' %}" class="nav-item">Tags</a></li>
+                    <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
                     <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
+                    <li class="nav-section-title">Quản lý</li>
+                {% if request.user.is_authenticated %}
+                    <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>
+                    {% if request.user.is_staff %}
+                        <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
+                    {% endif %}
+                {% endif %}
                 </ul>
             </li>
         </ul>
@@ -94,7 +80,7 @@
                             {{ q.own_user.username|slice:":1"|upper }}
                         </div>
                         <div class="meta">
-                            <a href="{% url 'user_profile' q.own_user.username %}" class="author-name" style="font-size: 0.9rem; font-weight: bold; color: #0074cc; text-decoration: none;">{{ q.own_user.username }}</a>
+                            <span class="author-name" style="font-size: 0.9rem; font-weight: bold; color: #0074cc;">{{ q.own_user.username }}</span>
                             <span class="post-date" style="font-size: 0.8rem; color: #6a737c; margin-left: 5px;">{{ q.creation_date|date:"d/m/Y H:i" }}</span>
                         </div>
                     </div>
@@ -105,8 +91,8 @@
                         <a href="{% url 'question_detail' q.id %}" style="color: #0074cc; text-decoration: none; font-weight: 500;">{{ q.title }}</a>
                     </h1>
 
-                    <div class="post-body ql-snow">
-                        <div class="ql-editor" style="font-size: 0.95rem; color: #3b4045;">
+                    <div class="post-body">
+                        <div style="font-size: 0.95rem; color: #3b4045;">
                             {{ q.body|safe|truncatewords_html:40 }}
                         </div>
                     </div>
@@ -121,28 +107,30 @@
                 </div>
 
                 <div class="post-footer" style="margin-top: 15px; display: flex; gap: 20px; align-items: center; border-top: 1px dashed #eee; padding-top: 10px;">
-                    <a href="{% url 'question_detail' q.id %}" class="stat-link">
-                        <div class="evaluation-group" style="font-size: 0.9rem; color: #3b4045;">
-                            <i class="fa-solid fa-caret-up" style="color: #6a737c;"></i> <b>{{ q.score }}</b> điểm
-                        </div>
-                    </a>
-
-                    <a href="{% url 'question_detail' q.id %}" class="stat-link">
-                        <div class="post-stats" style="font-size: 0.9rem; color: {% if q.answers.count > 0 %}#2e7d32{% else %}#6a737c{% endif %}; font-weight: {% if q.answers.count > 0 %}bold{% else %}normal{% endif %};">
-                            <i class="fa-regular fa-comment"></i> {{ q.answers.count }} trả lời
-                        </div>
-                    </a>
-
-                    <div style="font-size: 0.85rem; color: #6a737c;">
-                        <i class="fa-regular fa-eye"></i> {{ q.view_count }} lượt xem
+                    <div style="font-size: 0.9rem; color: #3b4045;">
+                        <b>{{ q.score }}</b> điểm
+                    </div>
+                    <div style="font-size: 0.9rem; color: #6a737c;">
+                        <i class="fa-regular fa-comment"></i> {{ q.answers.count }} trả lời
                     </div>
                 </div>
             </article>
         {% endfor %}
         </div>
     </main>
+
+    <aside class="right-sidebar" style="padding: 20px; width: 300px;">
+        <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
+            <h4 style="margin-top: 0;">Thống kê</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
+                <li>Thành viên: <strong>{{ user_count }}</strong></li>
+                <li>Câu hỏi: <strong>{{ question_count }}</strong></li>
+            </ul>
+        </div>
+    </aside>
 </div>
 
+<script src="{% static 'app/js/ai_search.js' %}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         if (typeof renderMathInElement === 'function') {
@@ -156,120 +144,5 @@
         }
     });
 </script>
-=======
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">DevCommunity</a>
-            <div class="search-bar">
-                <i class="fas fa-search" style="color: #888;"></i>
-                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
-                <div id="global-search-results" class="nav-search-results"></div>
-            </div>
-            <div class="user-actions">
-                <a href="{% url 'add_question' %}" class="btn-primary">Đặt câu hỏi</a>
-                <div class="user-avatar-placeholder">A</div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="main-container">
-        <nav class="left-sidebar">
-            <ul class="nav-links">
-                <li>
-                    <a href="#" class="nav-item">Trang chủ</a>
-                </li>
-                <li>
-                    <div class="nav-section-title">PUBLIC</div>
-                    <ul class="sub-nav">
-                        <li>
-                            <a href="#" class="nav-item active">
-                                <i class="fa-solid fa-earth-americas"></i> Questions
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tags' %}" class="nav-item">Tags</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users' %}" class="nav-item">Users</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="nav-section-title">COLLECTIVES</div>
-                    <ul class="sub-nav">
-                        <li><a href="#" class="nav-item">Khám phá</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-
-        <main class="content-area">
-        {%for q in questions%}
-            <article class="post-card question-card">
-                <div class="post-header">
-                    <div class="author-info">
-                        <div class="avatar">N</div>
-                        <div class="meta">
-                            <span class="author-name">{{q.own_user.username}}</span>
-                            <span class="post-date">{{q.creation_date}}</span>
-                        </div>
-                    </div>
-                    <button class="btn-icon" title="Báo cáo vi phạm">
-                        <i class="fa-regular fa-flag"></i>
-                    </button>
-                </div>
-
-                <div class="post-content">
-                    <h1 class="post-title">{{q.title}}</h1>
-                    <div class="post-body">
-                        {{ q.body|safe }}
-
-                    </div>
-                    <div class="tags-container">
-                        {% for tag in q.tags.all %}
-                        <span class="tag">{{tag.name}}</span>
-
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="post-footer">
-                    <div class="evaluation-group">
-                        <span class ="count"> Score: {{q.score}}</span>
-                    </div>
-                    <div class="post-stats">
-                        <span><i class="fa-regular fa-eye"></i> 120 Lượt xem</span>
-                        <span><i class="fa-regular fa-comment"></i> 1 Trả lời</span>
-                    </div>
-                </div>
-            </article>
-            {% endfor %}
-
-            </section>
-        </main>
-
-        <aside class="right-sidebar">
-            <div class="widget">
-                <h4>Thẻ nổi bật</h4>
-                <div class="tags-cloud">
-
-                    <span class="tag">javascript</span>
-                    <span class="tag">python</span>
-                    <span class="tag">java</span>
-                </div>
-            </div>
-            <div class="widget">
-                <h4>Thống kê</h4>
-                <ul class="stats-list">
-                    <li><span>Thành viên:</span> <strong>{{user_count}}</strong></li>
-                    <li><span>Câu hỏi:</span> <strong>{{question_count}}</strong></li>
-                </ul>
-            </div>
-        </aside>
-    </div>
-    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
 </body>
 </html>

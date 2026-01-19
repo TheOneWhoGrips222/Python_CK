@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tags - Thẻ </title>
-{% load static %}
+    <title>Tags - Thẻ cộng đồng</title>
+    {% load static %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'app/css/tag.css' %}">
@@ -13,172 +12,102 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-<<<<<<< HEAD
-            <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
-=======
-            <a href="#" class="logo">DevCommunity</a>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            <a href="{% url 'home' %}" class="logo">
+                <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
+            </a>
             <div class="search-bar">
                 <i class="fas fa-search" style="color: #888;"></i>
                 <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
                 <div id="global-search-results" class="nav-search-results"></div>
             </div>
-<<<<<<< HEAD
-             <div class="user-actions">
+            <div class="user-actions">
                 {% if request.user.is_authenticated %}
                     <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; text-decoration: none; padding: 5px 10px; border-radius: 4px;">
                         Đăng xuất
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng ký</a>
                 {% endif %}
-=======
-            <div class="user-actions">
-                <button class="btn btn-primary">Đặt câu hỏi</button>
-                <div class="user-avatar-placeholder">A</div>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
             </div>
         </div>
     </nav>
 
     <div class="main-container">
-
         <nav class="left-sidebar">
             <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
                 <li>
-                    <a href="{% url 'home' %}" class="nav-item">Trang chủ</a>
-                </li>
-                <li>
-<<<<<<< HEAD
                     <div class="nav-section-title">Cộng đồng</div>
                     <ul class="sub-nav">
-                        <li>
-                            <a href="{% url 'quest-page' %}" class="nav-item">
-                                <i class="fa-solid fa-earth-americas"></i> Câu hỏi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tag' %}" class="nav-item active">Tags</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users' %}" class="nav-item">Thành viên</a>
-                        </li>
-                  <li class="nav-section-title">Quản lý</li>
-                {% if request.user.is_staff %}
-                <li>
-
-                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
-                    </a>
-
-                      </li>
-                 {% endif %}
-                         {% if request.user.is_authenticated %}
-                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
-                        <i class="fas fa-user"></i> Quản lý Tài Khoản
-                    </a>
-                </li>
-                        {% endif %}
-=======
-                    <div class="nav-section-title">PUBLIC</div>
-                    <ul class="sub-nav">
-                        <li>
-                            <a href="{% url 'home' %}" class="nav-item">
-                                <i class="fa-solid fa-earth-americas"></i> Questions
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tags' %}" class="nav-item active">Tags</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users' %}" class="nav-item">Users</a>
-                        </li>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+                        <li><a href="{% url 'quest-page' %}" class="nav-item"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
+                        <li><a href="{% url 'tags' %}" class="nav-item active">Tags</a></li>
+                        <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
                     </ul>
                 </li>
+
+                {% if request.user.is_authenticated %}
+                <li>
+                    <div class="nav-section-title">QUẢN LÝ</div>
+                    <ul class="sub-nav">
+                        <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user-cog"></i> Quản lý tài khoản</a></li>
+                        {% if request.user.is_staff %}
+                        <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock"></i> Quản trị viên</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </nav>
 
         <main class="content-area">
-
             <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thẻ nổi bật</h1>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Mỗi thẻ đại diện cho một chủ đề quan tâm. Nhấp vào thẻ để xem các câu hỏi liên quan.</p>
+            <p style="color: #6a737c; margin-bottom: 2rem;">Mỗi thẻ đại diện cho một chủ đề quan tâm. Nhấp vào thẻ để xem các câu hỏi liên quan.</p>
 
-            <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%;">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Lọc theo tên thẻ...">
+            <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%; border: 1px solid #babfc4; padding: 8px; border-radius: 4px; display: flex; align-items: center; background: white;">
+                <i class="fa-solid fa-magnifying-glass" style="margin-right: 10px; color: #888;"></i>
+                <input type="text" placeholder="Lọc theo tên thẻ..." style="border: none; outline: none; width: 100%;">
             </div>
 
-            <div class="tags-grid">
-
-                <div class="post-card tag-card">
-                    <div class="tags-container">
-                        <span class="tag" style="background: #bae6fd; color: #0369a1;">javascript</span>
+            <div class="tags-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+                <div class="post-card tag-card" style="padding: 15px; border: 1px solid #e3e6e8; border-radius: 4px;">
+                    <div class="tags-container" style="margin-bottom: 10px;">
+                        <span class="tag" style="background: #e1ecf4; color: #39739d; padding: 4px 8px; border-radius: 3px; font-size: 13px;">javascript</span>
                     </div>
-                    <div class="tag-description">JavaScript là ngôn ngữ lập trình đa mô hình, thường được sử dụng để xây dựng các trang web tương tác.</div>
-                    <div class="tag-stats">
+                    <div class="tag-description" style="font-size: 0.85rem; color: #3b4045; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                        JavaScript là ngôn ngữ lập trình đa mô hình, thường được sử dụng để xây dựng các trang web tương tác.
+                    </div>
+                    <div class="tag-stats" style="font-size: 0.8rem; color: #6a737c;">
                         <strong>1,250</strong> câu hỏi
                     </div>
                 </div>
 
-                <div class="post-card tag-card">
-                    <div class="tags-container">
-                        <span class="tag" style="background: #d1fae5; color: #065f46;">python</span>
+                <div class="post-card tag-card" style="padding: 15px; border: 1px solid #e3e6e8; border-radius: 4px;">
+                    <div class="tags-container" style="margin-bottom: 10px;">
+                        <span class="tag" style="background: #e1ecf4; color: #39739d; padding: 4px 8px; border-radius: 3px; font-size: 13px;">python</span>
                     </div>
-                    <div class="tag-description">Python là ngôn ngữ lập trình cấp cao, được sử dụng rộng rãi cho phát triển web, khoa học dữ liệu và AI.</div>
-                    <div class="tag-stats">
+                    <div class="tag-description" style="font-size: 0.85rem; color: #3b4045; margin-bottom: 10px;">
+                        Python là ngôn ngữ lập trình cấp cao, được sử dụng rộng rãi cho phát triển web và AI.
+                    </div>
+                    <div class="tag-stats" style="font-size: 0.8rem; color: #6a737c;">
                         <strong>980</strong> câu hỏi
                     </div>
                 </div>
-
-                <div class="post-card tag-card">
-                    <div class="tags-container">
-                        <span class="tag" style="background: #fee2e2; color: #991b1b;">c#</span>
-                    </div>
-                    <div class="tag-description">C# là ngôn ngữ lập trình hướng đối tượng, được Microsoft phát triển và sử dụng phổ biến trên nền tảng .NET.</div>
-                    <div class="tag-stats">
-                        <strong>620</strong> câu hỏi
-                    </div>
-                </div>
-
-                <div class="post-card tag-card">
-                    <div class="tags-container">
-                        <span class="tag" style="background: #e3f2fd; color: #1e88e5;">sql-server</span>
-                    </div>
-                    <div class="tag-description">SQL Server là hệ quản trị cơ sở dữ liệu quan hệ được phát triển bởi Microsoft.</div>
-                    <div class="tag-stats">
-                        <strong>415</strong> câu hỏi
-                    </div>
-                </div>
-
             </div>
-
-
         </main>
 
         <aside class="right-sidebar">
-            <div class="widget">
-                <h4>Thẻ nổi bật (Phụ)</h4>
-                <div class="tags-cloud">
-                    <span class="tag">javascript</span>
-                    <span class="tag">python</span>
-                    <span class="tag">java</span>
-                    <span class="tag">c++</span>
-                    <span class="tag">html</span>
-                    <span class="tag">css</span>
-                </div>
-            </div>
-            <div class="widget">
-                <h4>Thống kê Cộng đồng</h4>
-                <ul class="stats-list">
-                    <li><span>Thành viên:</span> <strong>1,205</strong></li>
-                    <li><span>Câu hỏi:</span> <strong>450</strong></li>
+            <div class="widget" style="margin-bottom: 20px; border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0;">Thống kê</h4>
+                <ul class="stats-list" style="list-style: none; padding: 0; font-size: 0.9rem;">
+                    <li style="margin-bottom: 5px;">Thành viên: <strong>1,205</strong></li>
+                    <li>Câu hỏi: <strong>450</strong></li>
                 </ul>
             </div>
         </aside>
     </div>
-    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
+
+    <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 </html>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -14,34 +13,21 @@
 
     <nav class="navbar">
         <div class="nav-container">
-<<<<<<< HEAD
-            <a href="{% url 'home' %}" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
-=======
-            <a href="{% url 'home' %}" class="logo">DevCommunity</a>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+            <a href="{% url 'home' %}" class="logo">
+                <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
+            </a>
             <div class="search-bar">
                 <i class="fas fa-search" style="color: #888;"></i>
                 <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
                 <div id="global-search-results" class="nav-search-results"></div>
             </div>
-<<<<<<< HEAD
-             <div class="user-actions">
+            <div class="user-actions">
                 {% if request.user.is_authenticated %}
                     <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7;">
-                        Đăng xuất
-                    </a>
+                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng xuất</a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Đăng ký</a>
-=======
-            <div class="user-actions">
-                <a href="{% url 'add_question' %}" class="btn btn-primary">Đặt câu hỏi</a>
-                {% if request.user.is_authenticated %}
-                 <div class="user-avatar-placeholder">{{ request.user.username|slice:":1"|upper }}</div>
-                {% else %}
-                 <a href="{% url 'login' %}" class="btn btn-primary">Đăng nhập</a>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng nhập</a>
+                    <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng ký</a>
                 {% endif %}
             </div>
         </div>
@@ -51,100 +37,67 @@
 
         <nav class="left-sidebar">
             <ul class="nav-links">
+                <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
                 <li>
-                    <a href="{% url 'home' %}" class="nav-item">Trang chủ</a>
-                </li>
-                <li>
-<<<<<<< HEAD
-                    <div class="nav-section-title">Cộng đồng </div>
+                    <div class="nav-section-title">Cộng đồng</div>
                     <ul class="sub-nav">
-                        <li>
-                            <a href="{% url 'quest-page' %}" class="nav-item">
-                                <i class="fa-solid fa-earth-americas"></i> Câu hỏi
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tag' %}" class="nav-item">Tags</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users' %}" class="nav-item active">Thành viên</a>
-                        </li>
-                                     <li class="nav-section-title">Quản lý</li>
-                {% if request.user.is_staff %}
-                <li>
-
-                    <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                        <i class="fas fa-lock fa-sm"></i> Quản lý hệ thống
-                    </a>
-
-                      </li>
-                 {% endif %}
-                         {% if request.user.is_authenticated %}
-                   <li> <a href="{% url 'manage_account' %}" class="nav-item">
-                        <i class="fas fa-user"></i> Quản lý Tài Khoản
-                    </a>
-                </li>
-                        {% endif %}
-
-=======
-                    <div class="nav-section-title">PUBLIC</div>
-                    <ul class="sub-nav">
-                        <li>
-                            <a href="{% url 'home' %}" class="nav-item">
-                                <i class="fa-solid fa-earth-americas"></i> Questions
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'tags' %}" class="nav-item">Tags</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'users' %}" class="nav-item active">Users</a>
-                        </li>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
+                        <li><a href="{% url 'quest-page' %}" class="nav-item"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
+                        <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
+                        <li><a href="{% url 'users' %}" class="nav-item active">Thành viên</a></li>
                     </ul>
                 </li>
+
+                {% if request.user.is_authenticated %}
+                <li>
+                    <div class="nav-section-title">Quản lý</div>
+                    <ul class="sub-nav">
+                        <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>
+                        {% if request.user.is_staff %}
+                        <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </nav>
 
         <main class="content-area">
-
             <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thành viên Cộng đồng</h1>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Danh sách các thành viên tích cực và uy tín trong cộng đồng.</p>
+            <p style="color: #6a737c; margin-bottom: 2rem;">Danh sách các thành viên tích cực và uy tín trong cộng đồng.</p>
 
-            <div class="users-grid">
+            <div class="users-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
                 {% for u in users %}
-                <div class="user-card">
-                    <div class="user-avatar" style="background: #0074cc;">{{ u.username|slice:":1"|upper }}</div>
-                    <div class="user-name">
-                        <a href="{% url 'user_profile' u.username %}" style="color: inherit; text-decoration: none;">{{ u.username }}</a>
+                <div class="user-card" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px; text-align: center; background: white;">
+                    <div class="user-avatar" style="background: #0074cc; color: white; width: 60px; height: 60px; line-height: 60px; border-radius: 50%; margin: 0 auto 10px; font-size: 1.5rem; font-weight: bold;">
+                        {{ u.username|slice:":1"|upper }}
                     </div>
-<<<<<<< HEAD
-
-=======
-                    <div class="user-location"><i class="fa-solid fa-location-dot"></i> Vietnam</div>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
-                    <div class="user-stats">{{ u.reputation }} Điểm Uy Tín</div>
+                    <div class="user-name" style="font-weight: bold; margin-bottom: 5px;">
+                        <a href="{% url 'user_profile' u.username %}" style="color: #0074cc; text-decoration: none;">{{ u.username }}</a>
+                    </div>
+                    <div class="user-location" style="font-size: 0.8rem; color: #6a737c; margin-bottom: 5px;">
+                        <i class="fa-solid fa-location-dot"></i> Vietnam
+                    </div>
+                    <div class="user-stats" style="font-size: 0.85rem; font-weight: bold; color: #3b4045;">
+                        {{ u.reputation|default:0 }} Điểm Uy Tín
+                    </div>
                 </div>
+                {% empty %}
+                <p>Chưa có thành viên nào.</p>
                 {% endfor %}
             </div>
-
         </main>
 
         <aside class="right-sidebar">
-            <div class="widget">
-                <h4>Thống kê Cộng đồng</h4>
-                <ul class="stats-list">
-                    <li><span>Thành viên:</span> <strong>{{ users|length }}</strong></li>
+            <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
+                <h4 style="margin-top: 0;">Thống kê</h4>
+                <ul class="stats-list" style="list-style: none; padding: 0;">
+                    <li>Thành viên: <strong>{{ users|length }}</strong></li>
                 </ul>
             </div>
         </aside>
 
     </div>
-    {% load static %} <script src="{% static 'app/js/ai_search.js' %}"></script>
-</body>
 
-<<<<<<< HEAD
+    <script src="{% static 'app/js/ai_search.js' %}"></script>
+</body>
 </html>
-=======
-</html>
->>>>>>> a0dc079afa413ebec74a5db879eb9d85813f5237
