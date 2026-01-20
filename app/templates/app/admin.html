@@ -15,7 +15,7 @@
         <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
         <div class="user-actions">
             <span class="admin-name">Xin chào, Quản trị viên</span>
-            <div class="user-avatar-placeholder">AD</div>
+            <div class="user-avatar-placeholder">{{ request.user.username }}</div>
         </div>
     </div>
 </nav>
@@ -27,11 +27,13 @@
                 <a href="{% url 'admin_dashboard' %}" class="nav-item active">
                     <i class="fa-solid fa-chart-line"></i> Tổng quan
                 </a>
+
             </li>
+            <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
             <li>
                 <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
                 <ul class="sub-nav">
-                    <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
+
                     <li><a href="#" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
                     <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
                     <li><a href="#" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>

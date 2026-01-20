@@ -577,3 +577,49 @@ code {
         .ql-formula {
             font-family: 'KaTeX_Main', serif;
         }
+        .main-container {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden; /* Chống cuộn ngang toàn trang */
+    }
+
+    .content-area {
+        flex: 1;
+        min-width: 0; /* QUAN TRỌNG: Giúp nội dung co giãn đúng trong flexbox */
+        padding: 20px;
+    }
+
+    .post-card {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        min-width: 0;
+    }
+    .main-container {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden; /* Cắt bỏ bất kỳ phần nào cố tình tràn ra ngoài */
+}
+
+/* Cột nội dung chính */
+.content-area, .main-content {
+    flex: 1;
+    min-width: 0; /* Bắt buộc phải có để các phần tử con không đẩy khung */
+}
+
+/* Thẻ bài viết (dòng xám) */
+.post-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Tiêu đề bài viết */
+.post-title a {
+    display: block;
+    white-space: normal; /* Cho phép xuống dòng */
+    word-break: break-word;
+}
