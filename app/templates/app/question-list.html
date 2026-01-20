@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+     <link rel="stylesheet" href="{% static 'app/css/Page.css' %}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -71,52 +72,75 @@
             {% endif %}
         </div>
 
-        <div id="questions-wrapper">
-        {% for q in questions %}
-            <article class="post-card question-card" style="padding: 15px; border-bottom: 1px solid #e3e6e8; display: flex; flex-direction: column;">
-                <div class="post-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div class="author-info" style="display: flex; align-items: center; gap: 10px;">
-                        <div class="avatar" style="width: 32px; height: 32px; background: #e1ecf4; color: #39739d; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">
-                            {{ q.own_user.username|slice:":1"|upper }}
-                        </div>
-                        <div class="meta">
-                            <span class="author-name" style="font-size: 0.9rem; font-weight: bold; color: #0074cc;">{{ q.own_user.username }}</span>
-                            <span class="post-date" style="font-size: 0.8rem; color: #6a737c; margin-left: 5px;">{{ q.creation_date|date:"d/m/Y H:i" }}</span>
-                        </div>
-                    </div>
+       <div id="questions-wrapper" style="width: 100%;">
+    {% for q in questions %}
+    <article class="post-card" style="padding: 15px; border-bottom: 1px solid #e3e6e8; display: flex; flex-direction: column; width: 100%; box-sizing: border-box; min-width: 0;">
+
+        <div class="post-header" style="display: flex; justify-content: space-between; align-items: flex-start; min-width: 0;">
+            <div class="author-info" style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <div class="avatar" style="flex-shrink: 0; width: 32px; height: 32px; background: #e1ecf4; color: #39739d; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: bold; font-size: 0.8rem;">
+                    {{ q.own_user.username|slice:":1"|upper }}
                 </div>
-
-                <div class="post-content">
-                    <h1 class="post-title" style="font-size: 1.25rem; margin: 12px 0 8px 0;">
-                        <a href="{% url 'question_detail' q.id %}" style="color: #0074cc; text-decoration: none; font-weight: 500;">{{ q.title }}</a>
-                    </h1>
-
-                    <div class="post-body">
-                        <div style="font-size: 0.95rem; color: #3b4045;">
-                            {{ q.body|safe|truncatewords_html:40 }}
-                        </div>
-                    </div>
-
-                    <div class="tags-container" style="margin-top: 15px; display: flex; gap: 6px;">
-                        {% for tag in q.tags.all %}
-                            <span class="tag" style="background: #e1ecf4; color: #39739d; padding: 4px 8px; border-radius: 3px; font-size: 11px;">
-                                {{ tag.name }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                <div class="meta" style="min-width: 0; overflow: hidden;">
+                    <span class="author-name" style="font-size: 0.9rem; font-weight: bold; color: #0074cc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px;">{{ q.own_user.username }}</span>
+                    <span class="post-date" style="font-size: 0.8rem; color: #6a737c; margin-left: 5px;">{{ q.creation_date|date:"d/m/Y H:i" }}</span>
                 </div>
-
-                <div class="post-footer" style="margin-top: 15px; display: flex; gap: 20px; align-items: center; border-top: 1px dashed #eee; padding-top: 10px;">
-                    <div style="font-size: 0.9rem; color: #3b4045;">
-                        <b>{{ q.score }}</b> điểm
-                    </div>
-                    <div style="font-size: 0.9rem; color: #6a737c;">
-                        <i class="fa-regular fa-comment"></i> {{ q.answers.count }} trả lời
-                    </div>
-                </div>
-            </article>
-        {% endfor %}
+            </div>
         </div>
+
+        <div class="post-content" style="min-width: 0; flex: 1;">
+            <h1 class="post-title" style="font-size: 1.2rem; margin: 12px 0 8px 0; word-wrap: break-word; overflow-wrap: break-word;">
+                <a href="{% url 'question_detail' q.id %}" style="color: #0074cc; text-decoration: none; display: block; line-height: 1.4;">{{ q.title }}</a>
+            </h1>
+
+            <div class="post-body" style="font-size: 0.95rem; color: #3b4045; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                {{ q.body|safe|truncatewords_html:40 }}
+            </div>
+
+            <div class="tags-container" style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
+                {% for tag in q.tags.all %}
+                    <span class="tag" style="background: #e1ecf4; color: #39739d; padding: 4px 8px; border-radius: 3px; font-size: 11px; white-space: nowrap;">
+                        {{ tag.name }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="post-footer" style="margin-top: 15px; display: flex; gap: 20px; align-items: center; border-top: 1px dashed #eee; padding-top: 10px; flex-wrap: wrap;">
+            <div style="font-size: 0.9rem; color: #3b4045;">
+                <b style="color: #f48225;">{{ q.score }}</b> điểm
+            </div>
+            <div style="font-size: 0.9rem; color: #6a737c;">
+                <i class="fa-regular fa-comment"></i> {{ q.answers.count }} trả lời
+            </div>
+        </div>
+
+    </article>
+    {% endfor %}
+</div>
+        {% if questions.has_other_pages %}
+        <div class="pagination-container" style="margin-top: 25px; padding-bottom: 20px;">
+            <div class="pagination">
+                {% if questions.has_previous %}
+                    <a href="?page=1" class="page-link">&laquo; Đầu</a>
+                    <a href="?page={{ questions.previous_page_number }}" class="page-link">Trước</a>
+                {% endif %}
+
+                {% for num in questions.paginator.page_range %}
+                    {% if questions.number == num %}
+                        <span class="page-current">{{ num }}</span>
+                    {% elif num > questions.number|add:'-3' and num < questions.number|add:'3' %}
+                        <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if questions.has_next %}
+                    <a href="?page={{ questions.next_page_number }}" class="page-link">Sau</a>
+                    <a href="?page={{ questions.paginator.num_pages }}" class="page-link">Cuối &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </main>
 
     <aside class="right-sidebar" style="padding: 20px; width: 300px;">
@@ -125,6 +149,7 @@
             <ul style="list-style: none; padding: 0; font-size: 0.9rem;">
                 <li>Thành viên: <strong>{{ user_count }}</strong></li>
                 <li>Câu hỏi: <strong>{{ question_count }}</strong></li>
+                <li>Tag: <strong>{{ tagcount }}</strong></li>
             </ul>
         </div>
     </aside>

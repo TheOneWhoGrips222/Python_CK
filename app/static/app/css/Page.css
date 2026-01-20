@@ -1,0 +1,52 @@
+/* Container phân trang */
+.pagination-container {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    width: 100%; /* Đảm bảo không vượt quá cha */
+    clear: both;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: wrap; /* Tự xuống hàng nếu màn hình quá nhỏ, chống tràn */
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+}
+
+/* Style nút bấm */
+.page-link, .page-current {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border: 1px solid var(--border-color); /* Dùng biến từ style.css của bạn */
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    color: var(--text-main);
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+.page-current {
+    background-color: var(--orange-accent); /* Màu cam nổi bật */
+    color: white;
+    border-color: var(--orange-accent);
+    font-weight: bold;
+}
+
+/* Chống tràn cho nội dung chính */
+.main-content {
+    flex: 1;
+    min-width: 0; /* Ép flex-box không được nở ra quá giới hạn màn hình */
+    overflow-x: hidden; /* Cắt bỏ phần thừa nếu có */
+}

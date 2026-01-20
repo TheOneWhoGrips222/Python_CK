@@ -12,6 +12,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
+from django.core.paginator import Paginator
 
 from django.urls import reverse
 from django.utils import timezone
@@ -37,23 +38,28 @@ class SignUpForm(UserCreationForm):
 
 
 def home(request):
-
     sort = request.GET.get('sort', 'newest')
+
 
     questions = Question.objects.all()
 
     if sort == 'hot':
-
         questions = questions.order_by('-score', '-creation_date')
     elif sort == 'views':
-
         questions = questions.order_by('-view_count', '-creation_date')
     else:
-
         questions = questions.order_by('-creation_date')
 
+    # Bước 2: Thiết lập phân trang
+    items_per_page = 15
+    paginator = Paginator(questions, items_per_page)
+    page_number = request.GET.get('page')
+
+
+    questions = paginator.get_page(page_number)
+
     context = {
-        'questions': questions,
+        'questions': questions,  # Bây giờ 'questions' đã có thuộc tính .has_other_pages
         'current_sort': sort
     }
     return render(request, 'app/home.html', context)
@@ -157,12 +163,22 @@ def add_question(request):
 
 def tags_view(request):
     tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')
-    return render(request, 'app/tag.html', {'tags': tags})
+    tag_count = Tag.objects.count();
+    paginator = Paginator(tags, 15)
+    page_number = request.GET.get('page')
+    tags = paginator.get_page(page_number)
+    return render(request, 'app/tag.html', {'tags': tags,'tagcount':tag_count})
 
 
 def users_view(request):
     users = User.objects.all()
-    context = {'users': users}
+    user_count = User.objects.count();
+    items_per_page = 20
+    paginator = Paginator(users, items_per_page)
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    context = {'users': users,
+               'usercount': user_count}
     return render(request, 'app/user.html', context)
 
 @login_required(login_url='login')
@@ -204,11 +220,17 @@ def user_profile(request, username):
 
 def question_page(request):
     questions = Question.objects.all().order_by('-creation_date').prefetch_related('tags')
+    tag_count = Tag.objects.count();
+    paginator = Paginator(questions, 15)  # Mỗi trang 15 câu
+    page_number = request.GET.get('page')
+    questions = paginator.get_page(page_number)  # Gán lại vào biến 'questions'
     user_count = User.objects.all().count()
     question_count = Question.objects.all().count()
+
     context = {'questions': questions,
                'user_count': user_count,
-               'question_count': question_count
+               'question_count': question_count,
+               'tagcount' : tag_count
                }
 
     return render(request, 'app/question-list.html',context)
@@ -216,7 +238,7 @@ def question_page(request):
 
 @staff_member_required(login_url='login')
 def admin_dashboard(request):
-
+    current_username = request.user.username
     questions = Question.objects.all().order_by('-creation_date')[:10]
     user_count = User.objects.all().count()
     question_count = Question.objects.all().count()
@@ -226,7 +248,8 @@ def admin_dashboard(request):
                'user_count': user_count,
                'question_count': question_count,
                'answer_count': answer_count,
-               'report_count': report_count
+               'report_count': report_count,
+               'username': current_username
                }
     return render(request, 'app/admin.html',context)
 
@@ -244,15 +267,17 @@ def admin_users(request):
 
 
     if noi_dung_tim_kiem != "":
-        context = {
-            'users': list_user,
-
-        }
         list_user = list_user.filter(username__icontains=noi_dung_tim_kiem)
 
+    paginator = Paginator(list_user, 15)
+    page_number = request.GET.get('page')
+    users_paginated = paginator.get_page(page_number)
+    context = {
+        'users': users_paginated,
+        'search_query': noi_dung_tim_kiem,
+    }
 
-    return render(request, 'app/admin_user.html', {'users': list_user})
-
+    return render(request, 'app/admin_user.html',context)
 def toggle_staff(request, user_id):
     user = get_object_or_404(User, id=user_id)
 

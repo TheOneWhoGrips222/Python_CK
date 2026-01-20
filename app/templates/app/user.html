@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'app/css/user.css' %}">
+     <link rel="stylesheet" href="{% static 'app/css/Page.css' %}">
 </head>
 <body>
 
@@ -63,7 +64,7 @@
 
         <main class="content-area">
             <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thành viên Cộng đồng</h1>
-            <p style="color: #6a737c; margin-bottom: 2rem;">Danh sách các thành viên tích cực và uy tín trong cộng đồng.</p>
+
 
             <div class="users-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
                 {% for u in users %}
@@ -85,13 +86,39 @@
                 <p>Chưa có thành viên nào.</p>
                 {% endfor %}
             </div>
+
+
+            {% if users.has_other_pages %}
+            <div class="pagination-container" style="margin-top: 30px;">
+                <div class="pagination">
+                    {% if users.has_previous %}
+                        <a href="?page=1" class="page-link">&laquo; Đầu</a>
+                        <a href="?page={{ users.previous_page_number }}" class="page-link">Trước</a>
+                    {% endif %}
+
+                    {% for num in users.paginator.page_range %}
+                        {% if users.number == num %}
+                            <span class="page-current">{{ num }}</span>
+                        {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                            <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if users.has_next %}
+                        <a href="?page={{ users.next_page_number }}" class="page-link">Sau</a>
+                        <a href="?page={{ users.paginator.num_pages }}" class="page-link">Cuối &raquo;</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </main>
         </main>
 
         <aside class="right-sidebar">
             <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
                 <h4 style="margin-top: 0;">Thống kê</h4>
                 <ul class="stats-list" style="list-style: none; padding: 0;">
-                    <li>Thành viên: <strong>{{ users|length }}</strong></li>
+                    <li>Thành viên: <strong>{{ usercount}}</strong></li>
                 </ul>
             </div>
         </aside>
