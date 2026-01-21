@@ -53,4 +53,6 @@ urlpatterns = [
 
     path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
 path('manage-account/', views.manage_account, name='manage_account'),
+    path('admin-question/',views.admin_question, name='admin_question'),
+    path('delete-adquestion/<int:id>/', views.delete_admin_question, name='delete-adquestion'),
 ]
