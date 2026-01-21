@@ -278,6 +278,56 @@ def admin_users(request):
     }
 
     return render(request, 'app/admin_user.html',context)
+def admin_question(request):
+    # 1. Khởi tạo QuerySet
+    questions_list = Question.objects.all().select_related('own_user')
+
+    # 2. Lấy dữ liệu từ GET
+    search_val = request.GET.get('search', '').strip()
+    follow_val = request.GET.get('folow', 'DEF')
+    time_val = request.GET.get('time', 'new')
+    status_val = request.GET.get('status', 'default')
+
+    # 3. Logic Tìm kiếm
+    if search_val:
+        if follow_val == 'ID':
+            questions_list = questions_list.filter(id__icontains=search_val)
+        elif follow_val == 'USER':
+            questions_list = questions_list.filter(own_user__username__icontains=search_val)
+        elif follow_val == 'TAG':
+            questions_list = questions_list.filter(tags_raw__icontains=f"<{search_val}>")
+        elif follow_val == 'TITLE':
+            questions_list = questions_list.filter(title__icontains=search_val)
+
+    # 4. Logic Lọc trạng thái (Dùng cách này để không bị lỗi FieldError)
+    if status_val == 'answered':
+        questions_list = questions_list.filter(answers__isnull=False).distinct()
+    elif status_val == 'notans':
+        # Lấy những câu hỏi mà bảng Answer không có dữ liệu trỏ về
+        questions_list = questions_list.filter(answers__isnull=True)
+    elif status_val == 'report':
+        questions_list = questions_list.filter(reports__isnull=False).distinct()
+
+    # 5. Sắp xếp
+    questions_list = questions_list.order_by('creation_date' if time_val == 'old' else '-creation_date')
+
+    # 6. Phân trang
+    paginator = Paginator(questions_list, 15)
+    page_number = request.GET.get('page')
+    questions_obj = paginator.get_page(page_number)
+
+    context = {
+        'questions': questions_obj,
+        'search_val': search_val,
+        'follow_val': follow_val,
+        'time_val': time_val,
+        'status_val': status_val,
+    }
+    return render(request, 'app/admin_question.html', context)
+def delete_admin_question(request, id):
+    Question.objects.filter(id=id).delete()
+    return redirect('admin_question')
+
 def toggle_staff(request, user_id):
     user = get_object_or_404(User, id=user_id)
 

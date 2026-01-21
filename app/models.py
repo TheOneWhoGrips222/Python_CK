@@ -58,8 +58,21 @@ class Question(models.Model):
     accepted_answer = models.OneToOneField('Answer', on_delete=models.SET_NULL, null=True, blank=True,
                                            related_name='accepted_for_question')
 
-    def __str__(self):
-        return self.title
+    @property
+    def get_status_display(self):
+        # Import local để tránh vòng lặp import
+        from .models import Report, Answer
+
+        # 1. Kiểm tra báo cáo (Ưu tiên cao nhất)
+        if Report.objects.filter(question=self).exists():
+            return 'reported'
+
+        # 2. Kiểm tra thực tế xem có câu trả lời nào không
+        if Answer.objects.filter(question=self).exists():
+            return 'answered'
+
+        # 3. Mặc định
+        return 'pending'
 
 
 # 4. Bảng Answer
