@@ -15,10 +15,16 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .ai_search import find_similar_questions_ai
+<<<<<<< HEAD
+from .ai_tagging import suggest_tags_ai
+import html
+from django.utils.html import strip_tags
+=======
 import datetime
 from django.db.models import Count
 
 
+>>>>>>> 14121f544dc30d8d5160438ebd901acfc62a6d25
 User = get_user_model()
 
 class SignUpForm(UserCreationForm):
@@ -120,49 +126,64 @@ def question_detail(request, id):
 
 @login_required(login_url='login')
 def add_question(request):
-    # 1. Kiểm tra đăng nhập
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     if request.method == 'POST':
-        title = request.POST.get('title')
-        body = request.POST.get('body')
-        tag_data = request.POST.get('tags')
+        title = (request.POST.get('title') or "").strip()
+        body = (request.POST.get('body') or "").strip()
+        tag_data = (request.POST.get('tags') or "").strip()  # user có thể bỏ trống
 
-        if title and body:
+        if not title or not body:
+            return render(request, 'app/AddQuestion.html', {"error": "Vui lòng nhập tiêu đề và nội dung."})
 
-            question = Question.objects.create(
-                title=title,
-                body=body,
-                own_user=request.user,
-                creation_date= timezone.now()
-            )
+        # 1) Tạo câu hỏi trước
+        question = Question.objects.create(
+            title=title,
+            body=body,
+            own_user=request.user,
+            creation_date=timezone.now()
+        )
 
+        # 2) Manual tags (user nhập)
+        manual_tags = []
+        if tag_data:
+            manual_tags = [t.strip().lower() for t in tag_data.replace(',', ' ').split() if t.strip()]
 
-            if tag_data:
+        # 3) Clean text trước khi AI (loại HTML + unescape)
+        clean_title = strip_tags(html.unescape(title)).strip()
+        clean_body = strip_tags(html.unescape(body)).strip()
 
-                tag_list = [t.strip().lower() for t in tag_data.replace(',', ' ').split() if t.strip()]
+        # 4) AI tags (tự gán)
+        ai_suggestions = suggest_tags_ai(
+            clean_title,
+            clean_body,
+            top_k=12,
+            threshold=0.15
+        )
+        ai_tags = [name for name, _score in ai_suggestions]
 
-                raw_string = ""
+        # 5) Merge manual + AI (unique)
+        merged = []
+        for t in manual_tags + ai_tags:
+            t = (t or "").strip().lower()
+            if t and t not in merged:
+                merged.append(t)
 
-                for tag_name in tag_list[:5]:
+        # ✅ số tag tối đa lưu/hiển thị (bạn muốn nhiều hơn 5 thì tăng lên)
+        MAX_TAGS = 5
+        merged = merged[:MAX_TAGS]
 
-                    tag_obj, created = Tag.objects.get_or_create(name=tag_name)
+        # 6) Save M2M + tags_raw
+        raw_string = ""
+        for tag_name in merged:
+            tag_obj, _ = Tag.objects.get_or_create(name=tag_name)
+            question.tags.add(tag_obj)
+            raw_string += f"<{tag_name}>"
 
+        question.tags_raw = raw_string if raw_string else None
+        question.save()
 
-                    question.tags.add(tag_obj)
-
-
-                    raw_string += f"<{tag_name}>"
-
-                # 4. Cập nhật lại trường tags_raw vào câu hỏi
-                question.tags_raw = raw_string
-                question.save()
-
-            return redirect('quest-page')
+        return redirect('quest-page')
 
     return render(request, 'app/AddQuestion.html')
-
 
 def tags_view(request):
     tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')
