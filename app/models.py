@@ -97,6 +97,14 @@ class Answer(models.Model):
     def __str__(self):
         return f"Answer {self.id} for {self.question.title}"
 
+    def get_status_display(self):
+        # False là hiển thị -> Hoạt động
+        if not self.is_hidden:
+            return 'active'
+
+        # True là đang ẩn -> reported (để khớp với class red của bạn)
+        return 'hidden'
+
 
 # 5. Bảng Vote
 class Vote(models.Model):

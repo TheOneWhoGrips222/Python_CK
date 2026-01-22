@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý câu trả lời - DevCommunity ADMIN</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
+        <div class="user-actions">
+            <span class="admin-name">Xin chào, Quản trị viên</span>
+            <div class="user-avatar-placeholder">{{ request.user.username }}</div>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    <nav class="left-sidebar">
+        <ul class="nav-links">
+            <li>
+                <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                    <i class="fa-solid fa-chart-line"></i> Tổng quan
+                </a>
+            </li>
+            <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
+            <li>
+                <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
+                <ul class="sub-nav">
+                    <li><a href="{% url 'admin_question' %}" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'admin_answer' %}" class="nav-item active"><i class="fa-solid fa-comments"></i></i> Câu trả lời</a></li>
+                    <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
+                    <li><a href="{% url 'admin_tag' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                </ul>
+            </li>
+            <li>
+                <div class="nav-section-title">HỆ THỐNG</div>
+                <ul class="sub-nav">
+                    <li><a href="#" class="nav-item"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
+                    <li><a href="{% url 'logout' %}" class ="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a> </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+   <main class="content-area">
+    <div class="admin-card">
+        <div class="card-header">
+            <h3>Quản lý câu trả lời</h3>
+            <span class="badge blue">Tổng số: {{ answers.paginator.count }}</span>
+        </div>
+
+        <form method="GET" action="{% url 'admin_answer' %}">
+            <div class="filter-section" style="display: flex; gap: 10px; margin-bottom: 25px; align-items: center; background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #eee; flex-wrap: nowrap;">
+                <div class="search-box" style="width: 280px; flex-shrink: 0; position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                    <input type="text" name="search" value="{{ search_val|default:'' }}" placeholder="Tìm kiếm..."
+                           style="width: 80%; padding: 10px 10px 10px 35px; border: 1px solid #d1d5db; border-radius: 6px; outline: none;">
+                </div>
+
+                <select name="folow" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 140px;">
+                    <option value="DEF" {% if follow_val == 'DEF' %}selected{% endif %}>Mặc định</option>
+                    <option value="USER" {% if follow_val == 'USER' %} selected {% endif %}>Theo USERNAME</option>
+                </select>
+
+                <select name="time" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 140px;">
+                    <option value="new" {% if time_val == 'new' %}selected{% endif %}>Mới nhất</option>
+                    <option value="old" {% if time_val == 'old' %}selected{% endif %}>Cũ nhất</option>
+                </select>
+
+                <select name="status" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 150px;">
+                    <option value="default" {% if status_val == 'default' %}selected{% endif %}>Tất cả trạng thái</option>
+                    <option value="active" {% if status_val == 'active' %}selected{% endif %}>Hoạt động</option>
+                    <option value="hidden" {% if status_val == 'hidden' %}selected{% endif %}>Đang ẩn</option>
+                </select>
+
+                <button type="submit" class="action-btn" style="background: #2563eb; color: white; border: none; padding: 0 20px; height: 42px; border-radius: 6px; cursor: pointer; flex-shrink: 0;">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Người đăng</th>
+                        <th>Nội dung câu trả lời</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th style="text-align: center; width: 120px; white-space: nowrap;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for q in answers %}
+                    <tr>
+                        <td><span class="text-muted">#{{q.id}}</span></td>
+                        <td><strong>{{q.own_user.username}}</strong></td>
+                        <td>
+                             <div class="truncate" style="max-width: 400px;">{{ q.body|striptags|truncatechars:100 }}</div>
+                             <small class="text-muted" style="display:block;">Thuộc câu hỏi: {{ q.question.title|truncatechars:50 }}</small>
+                        </td>
+                        <td>{{q.creation_date|date:"d/m/Y"}}<br><small class="text-muted">{{q.creation_date|time:"H:i"}}</small></td>
+                        <td>
+                            {% with status=q.get_status_display %}
+                                {% if status == 'hidden' %}
+                                    <span class="badge red">Đang ẩn</span>
+                                {% else %}
+                                    <span class="badge green">Hoạt động</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: nowrap;">
+                                <a href="{% url 'toggle-answer' q.id %}" class="action-btn" title="Ẩn/Hiện">
+                                    {% if q.is_hidden %}
+                                        <i class="fa-solid fa-eye-slash" style="color: orange;"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-eye" style="color: green;"></i>
+                                    {% endif %}
+                                </a>
+                                <a href="{% url 'delete-adanswer' q.id %}"
+                                   class="action-btn text-danger"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa câu trả lời này?')"
+                                   title="Xóa">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if answers.has_other_pages %}
+        <div class="pagination-container" style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 5px; padding-bottom: 20px;">
+            {% if answers.has_previous %}
+                <a href="?page=1&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-angles-left"></i></a>
+                <a href="?page={{ answers.previous_page_number }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-chevron-left"></i></a>
+            {% endif %}
+
+            {% for num in answers.paginator.page_range %}
+                {% if answers.number == num %}
+                    <span class="action-btn" style="background: #2563eb; color: white; border: none;">{{ num }}</span>
+                {% elif num > answers.number|add:'-3' and num < answers.number|add:'3' %}
+                    <a href="?page={{ num }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn" style="text-decoration: none; color: inherit;">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if answers.has_next %}
+                <a href="?page={{ answers.next_page_number }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-chevron-right"></i></a>
+                <a href="?page={{ answers.paginator.num_pages }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-angles-right"></i></a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</main>
+</div>
+
+</body>
+</html>
