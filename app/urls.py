@@ -53,7 +53,12 @@ urlpatterns = [
     path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
     path('manage-account/', views.manage_account, name='manage_account'),
     path('admin-question/',views.admin_question, name='admin_question'),
+    path('admin-tag/',views.admin_tag, name='admin_tag'),
     path('delete-adquestion/<int:id>/', views.delete_admin_question, name='delete-adquestion'),
+   path('delete-adtag/<int:id>/', views.del_tag, name='delete-adtag'),
+    path('admin-answer/',views.admin_answer, name='admin_answer'),
+    path('delete-adanswer/<int:id>/', views.del_answer, name='delete-adanswer'),
+    path('toggle-answer/<int:id>/', views.toggle_answer, name='toggle-answer'),
 
     path('answer/toggle-hide/<int:id>/', views.toggle_hide_answer, name='toggle_hide_answer'),
     path('answer/report/<int:id>/', views.report_answer, name='report_answer'),
