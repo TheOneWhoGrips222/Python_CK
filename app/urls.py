@@ -48,11 +48,13 @@ urlpatterns = [
     #path('account/',views.manage_account,name='manage_account'),
     path('tags/',views.tags_view,name='tags'),
 
-
     path('api/search_similar/', views.search_similar_questions, name='search_similar_questions'),
 
     path('answer/<int:id>/', views.accept_answer, name='accept_answer'),
-path('manage-account/', views.manage_account, name='manage_account'),
+    path('manage-account/', views.manage_account, name='manage_account'),
     path('admin-question/',views.admin_question, name='admin_question'),
     path('delete-adquestion/<int:id>/', views.delete_admin_question, name='delete-adquestion'),
+
+    path('answer/toggle-hide/<int:id>/', views.toggle_hide_answer, name='toggle_hide_answer'),
+    path('answer/report/<int:id>/', views.report_answer, name='report_answer'),
 ]

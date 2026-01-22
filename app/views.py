@@ -2,25 +2,15 @@ from datetime import date
 from urllib import request
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
-from django.http import JsonResponse
-from .ai_search import find_similar_questions_ai
-from django.shortcuts import redirect, get_object_or_404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.core.paginator import Paginator
-
-from django.urls import reverse
 from django.utils import timezone
-
-
-
-from .models import Question, Answer, Tag , Vote,Report
-from django.db.models import Count
+from .models import Question, Answer, Tag , Vote, Report
+from django.db.models import Count, Sum, Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -98,6 +88,14 @@ def logout_view(request):
 
 def question_detail(request, id):
     question = get_object_or_404(Question, id=id)
+
+    if request.user.is_staff:
+        answers = question.answers.all()
+
+    elif request.user.is_authenticated:
+        answers = question.answers.filter(Q(is_hidden=False) | Q(own_user=request.user))
+    else:
+        answers = question.answers.filter(is_hidden=False)
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
@@ -113,7 +111,7 @@ def question_detail(request, id):
                 own_user=request.user
             )
             return redirect('question_detail', id=id)
-    return render(request, 'app/question.html', {'question': question})
+    return render(request, 'app/question.html', {'question': question, 'answers': answers})
 
 @login_required(login_url='login')
 def add_question(request):
@@ -257,7 +255,6 @@ def delete_question(request, id):
     Question.objects.filter(id=id).delete()
     return redirect('admin_dashboard')
 
-
 def admin_users(request):
 
     noi_dung_tim_kiem = request.GET.get('search', '')
@@ -278,6 +275,7 @@ def admin_users(request):
     }
 
     return render(request, 'app/admin_user.html',context)
+
 def admin_question(request):
     # 1. Khởi tạo QuerySet
     questions_list = Question.objects.all().select_related('own_user')
@@ -324,6 +322,7 @@ def admin_question(request):
         'status_val': status_val,
     }
     return render(request, 'app/admin_question.html', context)
+
 def delete_admin_question(request, id):
     Question.objects.filter(id=id).delete()
     return redirect('admin_question')
@@ -353,9 +352,6 @@ def toggle_active(request, user_id):
     user.save()
     return redirect('admin_users')
 
-
-
-
 def search_similar_questions(request):
     """API trả về JSON danh sách câu hỏi tương tự cho tính năng Autocomplete"""
     query = request.GET.get('q', '')
@@ -372,9 +368,19 @@ def search_similar_questions(request):
         return JsonResponse({'results': results})
     return JsonResponse({'results': []})
 
+# Ẩn câu trả lời (cho admin)
+@staff_member_required(login_url='login')
+def toggle_hide_answer(request, id):
+    answer = get_object_or_404(Answer, id=id)
+    answer.is_hidden = not answer.is_hidden
+    answer.save()
+
+    status = "đã ẩn" if answer.is_hidden else "đã hiện lại"
+    messages.success(request, f"Câu trả lời {status}.")
+    return redirect('question_detail', id=answer.question.id)
+
 # Yêu cầu đăng nhập
 @login_required
-
 def accept_answer(request, id):
     # Lấy câu trả lời theo id
     answer = get_object_or_404(Answer, id=id)
@@ -446,3 +452,33 @@ def manage_account(request):
         'user_questions': user_questions,
     }
     return render(request, 'app/ManageUser.html', context)
+
+@login_required(login_url='login')
+def report_answer(request, id):
+    answer = get_object_or_404(Answer, id=id)
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', 'Spam/Nội dung rác')
+        existing_report = Report.objects.filter(own_user=request.user, answer=answer).exists()
+        if existing_report:
+            messages.warning(request, "Bạn đã báo cáo câu trả lời này rồi!")
+            return redirect('question_detail', id=answer.question.id)
+
+        Report.objects.create(
+            own_user=request.user,
+            answer=answer,
+            reason=reason,
+            status='Pending',
+        )
+
+        report_count = answer.reports.count()
+
+        if report_count > 3 and not answer.is_hidden:
+            answer.is_hidden = True
+            answer.save()
+            messages.warning(request, "Nội dung này đã bị ẩn do nhận nhiều báo cáo từ cộng đồng.")
+        else:
+            messages.success(request, f"Cảm ơn bạn đã báo cáo. (Hiện có {report_count} báo cáo)")
+
+    return redirect('question_detail', id=answer.question.id)
+
