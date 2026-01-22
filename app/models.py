@@ -89,6 +89,8 @@ class Answer(models.Model):
     # Trường bổ sung để hỗ trợ hiển thị nhanh
     is_accepted = models.BooleanField(default=False)
 
+    is_hidden = models.BooleanField(default=False, help_text="Đánh dấu ẩn (do admin ẩn hoặc bị report)")
+
     class Meta:
         ordering = ['-is_accepted', '-score', 'creation_date']
 
