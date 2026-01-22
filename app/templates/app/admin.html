@@ -7,6 +7,7 @@
     {% load static %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -23,107 +24,172 @@
 <div class="main-container">
     <nav class="left-sidebar">
         <ul class="nav-links">
-            <li>
-                <a href="{% url 'admin_dashboard' %}" class="nav-item active">
-                    <i class="fa-solid fa-chart-line"></i> Tổng quan
-                </a>
-
-            </li>
+            <li><a href="{% url 'admin_dashboard' %}" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Tổng quan</a></li>
             <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
             <li>
                 <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
                 <ul class="sub-nav">
-
-                    <li><a href="#" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'admin_question' %}" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'admin_answer' %}" class="nav-item"><i class="fa-solid fa-comments"></i> Câu trả lời</a></li>
                     <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
-                    <li><a href="#" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                    <li><a href="{% url 'admin_tag' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
                 </ul>
             </li>
             <li>
                 <div class="nav-section-title">HỆ THỐNG</div>
                 <ul class="sub-nav">
                     <li><a href="#" class="nav-item"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
-                    <li><a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Cài đặt</a></li>
+                    <li><a href="{% url 'logout' %}" class ="nav-item"><i class="fa-solid fa-door-open"></i> Đăng xuất</a> </li>
                 </ul>
             </li>
         </ul>
     </nav>
 
     <main class="content-area">
-
-        <div class="stats-grid">
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; margin-bottom: 30px;">
             <div class="stat-box">
                 <div class="icon-wrap blue"><i class="fa-solid fa-users"></i></div>
-                <div class="stat-detail">
-                    <p>Người dùng</p>
-                    <h3>{{user_count}}</h3>
-                </div>
+                <div class="stat-detail"><p>Người dùng</p><h3>{{user_count}}</h3></div>
             </div>
             <div class="stat-box">
                 <div class="icon-wrap orange"><i class="fa-solid fa-question"></i></div>
-                <div class="stat-detail">
-                    <p>Câu hỏi</p>
-                    <h3>{{question_count}}</h3>
-                </div>
+                <div class="stat-detail"><p>Câu hỏi</p><h3>{{question_count}}</h3></div>
             </div>
             <div class="stat-box">
                 <div class="icon-wrap green"><i class="fa-solid fa-comments"></i></div>
+                <div class="stat-detail"><p>Trả lời</p><h3>{{answer_count}}</h3></div>
+            </div>
+            <div class="stat-box">
+                <div class="icon-wrap orange" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-tags"></i></div>
                 <div class="stat-detail">
-                    <p>Trả lời</p>
-                    <h3>{{answer_count}}</h3>
+                    <p>Tổng số Thẻ</p>
+                    <h3>{{tag_count}}</h3>
                 </div>
             </div>
             <div class="stat-box">
                 <div class="icon-wrap red"><i class="fa-solid fa-circle-exclamation"></i></div>
-                <div class="stat-detail">
-                    <p>Báo cáo mới</p>
-                    <h3>{{report_count}}</h3>
-                </div>
+                <div class="stat-detail"><p>Báo cáo mới</p><h3>{{report_count}}</h3></div>
             </div>
         </div>
 
-        <div class="admin-card">
-            <div class="card-header">
-                <h3>Câu hỏi mới nhất</h3>
-
+        <div class="charts-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px;">
+            <div class="admin-card">
+                <div class="card-header"><h3><i class="fa-solid fa-chart-line"></i> Tăng trưởng (7 ngày)</h3></div>
+                <div style="height: 250px;"><canvas id="lineChart"></canvas></div>
             </div>
-            <div class="table-responsive">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Người đăng</th>
-                            <th>Tiêu đề</th>
-                            <th>Ngày tạo</th>
+            <div class="admin-card">
+                <div class="card-header"><h3><i class="fa-solid fa-bolt"></i> Tốc độ phản hồi (Giờ)</h3></div>
+                <div style="height: 250px;"><canvas id="respChart"></canvas></div>
+            </div>
+        </div>
 
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <div class="charts-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 30px;">
+            <div class="admin-card">
+                <div class="card-header"><h3><i class="fa-solid fa-award"></i> Top người dùng uy tín</h3></div>
+                <div style="height: 300px;"><canvas id="userRepChart"></canvas></div>
+            </div>
+            <div class="admin-card">
+                <div class="card-header"><h3><i class="fa-solid fa-chart-pie"></i> Tỷ lệ dữ liệu</h3></div>
+                <div style="height: 300px;"><canvas id="pieChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="bottom-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <div class="admin-card">
+                <h3><i class="fa-solid fa-tags"></i> Thẻ phổ biến</h3>
+                {% for tag in top_tags %}
+                <div style="margin-bottom: 15px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 5px;">
+                        <span class="badge blue">#{{ tag.name }}</span>
+                        <small>{{ tag.num_questions }} bài</small>
+                    </div>
+                    <div style="background: #eee; height: 6px; border-radius: 3px;">
+                        <div style="background: var(--orange-accent); width: {% widthratio tag.num_questions question_count 100 %}%; height: 100%; border-radius: 3px;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="admin-card">
+                <h3><i class="fa-solid fa-history"></i> Câu hỏi mới nhất</h3>
+                <div class="recent-list">
                     {% for q in questions %}
-                        <tr>
-
-                            <td>#{{q.id}}</td>
-                            <td><span class="user-cell"></span> <strong>{{q.own_user.username}}</strong></td>
-                            <td><div class="truncate">{{q.title}}</div></td>
-                            <td>{{q.creation_date}}</td>
-
-                            <td>
-                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
-                               <a href="{% url 'delete_question' q.id %}"
-                                 class="action-btn text-danger"
-                                 onclick="return confirm('chắc chắn muốn xóa câu hỏi này không?')">
-                                <i class="fa-solid fa-trash"></i>
-                               </a>
-                            </td>
-                        </tr>
-                    {% endfor%}
-                        </tbody>
-                </table>
+                    <div style="padding: 10px 0; border-bottom: 1px solid #f1f1f1;">
+                        <strong style="color: var(--primary-color);">{{ q.own_user.username }}</strong>: {{ q.title|truncatechars:50 }}
+                        <br><small class="text-muted">{{ q.creation_date|date:"d/m H:i" }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </main>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Biểu đồ Đường: Tăng trưởng
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: {{ days|safe }},
+                datasets: [{
+                    label: 'Câu hỏi mới',
+                    data: {{ counts|safe }},
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 2. Biểu đồ Đường: Tốc độ phản hồi (Giờ)
+        new Chart(document.getElementById('respChart'), {
+            type: 'line',
+            data: {
+                labels: {{ resp_days|safe }},
+                datasets: [{
+                    label: 'Số giờ trung bình',
+                    data: {{ resp_values|safe }},
+                    borderColor: '#dc2626',
+                    backgroundColor: '#dc2626',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 3. Biểu đồ Cột: Uy tín User
+        new Chart(document.getElementById('userRepChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ user_labels|safe }},
+                datasets: [{
+                    label: 'Điểm uy tín',
+                    data: {{ user_reps|safe }},
+                    backgroundColor: '#10b981',
+                    borderRadius: 5
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 4. Biểu đồ Tròn: Tỷ lệ
+        new Chart(document.getElementById('pieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Hỏi', 'Đáp', 'Báo cáo'],
+                datasets: [{
+                    data: [{{ question_count }}, {{ answer_count }}, {{ report_count }}],
+                    backgroundColor: ['#f48225', '#10b981', '#dc2626']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+        });
+    });
+</script>
 </body>
 </html>
