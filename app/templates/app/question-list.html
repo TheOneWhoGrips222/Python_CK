@@ -45,13 +45,13 @@
 <div class="main-container">
     <nav class="left-sidebar">
         <ul class="nav-links">
-            <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
+            <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
             <li>
                 <div class="nav-section-title">Cộng đồng</div>
                 <ul class="sub-nav">
                     <li><a href="{% url 'quest-page' %}" class="nav-item active"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
-                    <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
-                    <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
+                    <li><a href="{% url 'tags' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Tags</a></li>
+                    <li><a href="{% url 'users' %}" class="nav-item"><i class="fas fa-users"></i> Thành viên</a></li>
                     <li class="nav-section-title">Quản lý</li>
                 {% if request.user.is_authenticated %}
                     <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>

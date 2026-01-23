@@ -96,33 +96,72 @@ def logout_view(request):
     return redirect('home')
 
 
+from django.db.models import Q
+
+
 def question_detail(request, id):
     question = get_object_or_404(Question, id=id)
 
-    if request.user.is_staff:
-        answers = question.answers.all()
-    elif request.user.is_authenticated:
-        answers = question.answers.filter(Q(is_hidden=False) | Q(own_user=request.user))
-    else:
-        answers = question.answers.filter(is_hidden=False)
+    # Logic tăng lượt xem (giữ nguyên của bạn)
+    viewed_questions = request.session.get('viewed_questions', [])
+    if id not in viewed_questions:
+        question.view_count += 1
+        question.save()
+        viewed_questions.append(id)
+        request.session['viewed_questions'] = viewed_questions
 
+    # TÍNH TOÁN ĐIỂM CHO CÂU HỎI
+    question.likes = question.votes.filter(value=1).count()
+    question.dislikes = question.votes.filter(value=-1).count()
+    question.score = question.likes - question.dislikes  # Điểm = Like - Dislike
+
+    # Trạng thái nút bấm của user
+    question.user_vote = 0
+    if request.user.is_authenticated:
+        user_q_vote = question.votes.filter(user=request.user).first()
+        if user_q_vote:
+            question.user_vote = user_q_vote.value
+
+    # Lọc danh sách câu trả lời (giữ nguyên logic staff/user của bạn)
+    if request.user.is_staff:
+        answers_list = question.answers.all().order_by('-creation_date')
+    elif request.user.is_authenticated:
+        answers_list = question.answers.filter(Q(is_hidden=False) | Q(own_user=request.user)).order_by('-creation_date')
+    else:
+        answers_list = question.answers.filter(is_hidden=False).order_by('-creation_date')
+
+    paginator = Paginator(answers_list, 5)
+    page_number = request.GET.get('page')
+    answers = paginator.get_page(page_number)
+
+    # TÍNH TOÁN ĐIỂM CHO TỪNG CÂU TRẢ LỜI
+    for answer in answers:
+        answer.likes = answer.votes.filter(value=1).count()
+        answer.dislikes = answer.votes.filter(value=-1).count()
+        answer.score = answer.likes - answer.dislikes  # Điểm = Like - Dislike
+
+        answer.user_vote = 0
+        if request.user.is_authenticated:
+            user_a_vote = answer.votes.filter(user=request.user).first()
+            if user_a_vote:
+                answer.user_vote = user_a_vote.value
+
+    # Logic POST answer (giữ nguyên)
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
-
         if question.accepted_answer:
             return redirect('question_detail', id=id)
-
         content = request.POST.get('content')
         if content:
-            Answer.objects.create(
-                question=question,
-                body=content,
-                own_user=request.user
-            )
+            Answer.objects.create(question=question, body=content, own_user=request.user)
             return redirect('question_detail', id=id)
-    return render(request, 'app/question.html', {'question': question, 'answers': answers})
 
+    return render(request, 'app/question.html', {
+        'question': question,
+        'answers': answers,
+        'total_answers_count': answers_list.count()
+    })
 
 @login_required(login_url='login')
 def add_question(request):
@@ -617,3 +656,33 @@ def toggle_lock_question(request, question_id):
         messages.error(request, "Bạn không có quyền thực hiện thao tác này.")
 
     return redirect('question_detail', id=question.id)
+
+
+@login_required(login_url='login')
+def vote(request, content_type, content_id, vote_type):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+
+    model = Question if content_type == 'question' else Answer
+    obj = get_object_or_404(model, id=content_id)
+
+
+    value = 1 if vote_type == 'up' else -1
+
+
+    existing_vote = obj.votes.filter(user=request.user).first()
+
+    if existing_vote:
+        if existing_vote.value == value:
+
+            existing_vote.delete()
+        else:
+            existing_vote.value = value
+            existing_vote.save()
+    else:
+        obj.votes.create(user=request.user, value=value)
+
+
+    question_id = obj.id if content_type == 'question' else obj.question.id
+    return redirect('question_detail', id=question_id)
