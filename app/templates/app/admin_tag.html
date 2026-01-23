@@ -36,13 +36,13 @@
                     <li><a href="{% url 'admin_question' %}" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
                    <li><a href="{% url 'admin_answer' %}" class="nav-item "><i class="fa-solid fa-comments"></i></i> Câu trả lời</a></li>
                     <li><a href="{% url 'admin_users' %}" class="nav-item "><i class="fa-solid fa-users"></i> Người dùng</a></li>
-                    <li><a href="{% url 'admin_tag' %}" class="nav-item active"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                    <li><a href="{% url 'admin_tag' %}" class="nav-item active "><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
                 </ul>
             </li>
             <li>
                 <div class="nav-section-title">HỆ THỐNG</div>
                 <ul class="sub-nav">
-                    <li><a href="#" class="nav-item"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
+                   <li><a href="{% url 'admin_report' %}" class="nav-item "><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
                     <li><a href="{% url 'logout' %}" class ="nav-item"><i class="fa-solid fa-door-open"></i> Đăng xuất</a> </li>
                 </ul>
             </li>

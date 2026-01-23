@@ -7,237 +7,184 @@
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS cho phần thông báo */
-        .messages-container {
-            max-width: 1100px;
-            margin: 15px auto;
-            padding: 0 20px;
-        }
-        .alert {
-            padding: 12px 20px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            animation: slideIn 0.3s ease-out;
-        }
+        .messages-container { max-width: 1100px; margin: 15px auto; padding: 0 20px; }
+        .alert { padding: 12px 20px; border-radius: 6px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; font-size: 14px; animation: slideIn 0.3s ease-out; }
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Nút Vote giữ nguyên Style bạn muốn nhưng thêm hiệu ứng Active */
+        .vote-btn-pro {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+            color: #6a737c;
+            background: #f8f9fa;
+            border: 1px solid #e3e6e8;
+        }
+
+        /* Khi đã ấn (Active) */
+        .vote-btn-pro.like:hover, .vote-btn-pro.like.active { color: #28a745; background: #e8f5e9; border-color: #28a745; }
+        .vote-btn-pro.dislike:hover, .vote-btn-pro.dislike.active { color: #dc3545; background: #fdf2f2; border-color: #dc3545; }
+
+        /* Hiệu ứng ấn xuống */
+        .vote-btn-pro:active { transform: scale(0.95); }
+
+        .score-display { font-weight: bold; color: #212529; margin-left: 10px; font-size: 14px; background: #eee; padding: 4px 10px; border-radius: 4px; }
+        .pagination { display: flex; gap: 5px; margin: 20px 0; justify-content: center; }
+        .btn-page { padding: 6px 12px; border: 1px solid #ddd; text-decoration: none; color: #39739d; border-radius: 3px; font-size: 14px; }
+        .btn-page.active { background-color: #f48225; color: white; border-color: #f48225; font-weight: bold; }
+        .accepted-border { border: 2px solid #28a745 !important; background-color: #f6fff8 !important; }
+        .accepted-badge { color: #28a745; font-weight: bold; margin-bottom: 10px; display: block; }
+        .btn-accept-link { color: #6a737c; text-decoration: none; font-size: 13px; margin-right: 15px; transition: 0.2s; }
+        .btn-accept-link:hover { color: #28a745; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'home' %}" class="logo">
-                <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
-            </a>
-
-            <div class="search-bar">
-                <i class="fas fa-search" style="color: #888;"></i>
-                <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
-                <div id="global-search-results" class="nav-search-results"></div>
-            </div>
-
-            <div class="user-actions">
-                {% if request.user.is_authenticated %}
-                    <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
-                    <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng xuất</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng nhập</a>
-                    <a href="{% url 'register' %}" class="btn-primary" style="text-decoration: none; padding: 5px 10px; border-radius: 4px;">Đăng ký</a>
-                {% endif %}
-            </div>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'home' %}" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity</a>
+        <div class="search-bar">
+            <i class="fas fa-search" style="color: #888;"></i>
+            <input type="text" id="global-search-input" placeholder="Tìm kiếm bằng AI..." autocomplete="off">
+            <div id="global-search-results" class="nav-search-results"></div>
         </div>
-    </nav>
+        <div class="user-actions">
+            {% if request.user.is_authenticated %}
+                <span style="font-size: 0.9rem;">Chào, <b>{{ request.user.username }}</b></span>
+                <a href="{% url 'logout' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; border: 1px solid #7aa7c7; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng xuất</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-primary" style="background: #e1ecf4; color: #39739d; padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng nhập</a>
+                <a href="{% url 'register' %}" class="btn-primary" style="padding: 5px 10px; border-radius: 4px; text-decoration: none;">Đăng ký</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
 
     {% if messages %}
     <div class="messages-container" id="django-messages">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
-            {{ message }}
-        </div>
+        <div class="alert alert-{{ message.tags }}"><i class="fas fa-info-circle"></i> {{ message }}</div>
         {% endfor %}
     </div>
-    <script>
-        setTimeout(function() {
-            const msg = document.getElementById('django-messages');
-            if (msg) msg.style.display = 'none';
-        }, 5000);
-    </script>
+    <script>setTimeout(() => { const msg = document.getElementById('django-messages'); if (msg) msg.style.display = 'none'; }, 5000);</script>
     {% endif %}
 
     <div class="main-container">
         <nav class="left-sidebar">
             <ul class="nav-links">
-                <li><a href="{% url 'home' %}" class="nav-item">Trang chủ</a></li>
+                <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
                 <li>
                     <div class="nav-section-title">Cộng đồng</div>
                     <ul class="sub-nav">
                         <li><a href="{% url 'quest-page' %}" class="nav-item active"><i class="fa-solid fa-earth-americas"></i> Câu hỏi</a></li>
-                        <li><a href="{% url 'tags' %}" class="nav-item">Tags</a></li>
-                        <li><a href="{% url 'users' %}" class="nav-item">Thành viên</a></li>
-                    </ul>
-                </li>
-                {% if request.user.is_authenticated %}
-                <li>
-                    <div class="nav-section-title">Quản lý</div>
-                    <ul class="sub-nav">
+                        <li><a href="{% url 'tags' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Tags</a></li>
+                        <li><a href="{% url 'users' %}" class="nav-item"><i class="fas fa-users"></i> Thành viên</a></li>
+                        <li class="nav-section-title">Quản lý</li>
+                    {% if request.user.is_authenticated %}
                         <li><a href="{% url 'manage_account' %}" class="nav-item"><i class="fas fa-user"></i> Quản lý Tài Khoản</a></li>
                         {% if request.user.is_staff %}
-                        <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
+                            <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fas fa-lock fa-sm"></i> Quản lý hệ thống</a></li>
                         {% endif %}
+                    {% endif %}
                     </ul>
                 </li>
-                {% endif %}
             </ul>
         </nav>
 
         <main class="main-content-upgraded">
             {% if not question.is_hidden or user.is_staff or request.user == question.own_user %}
-            <section class="question-card {% if question.is_hidden %}hidden-content{% endif %}" style="{% if question.is_hidden %}border: 2px dashed red; opacity: 0.8;{% endif %}">
+            <section class="question-card" style="{% if question.is_hidden %}border: 2px dashed red; opacity: 0.8; background: #fff1f0;{% endif %}">
                 <header class="post-header-pro">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <h1 style="flex: 1;">{{ question.title }} {% if question.is_hidden %}(BỊ ẨN){% endif %}</h1>
-
-                        {% if request.user == question.own_user or user.is_staff %}
-                        <div class="admin-controls">
-                            <form action="{% url 'toggle_lock_question' question.id %}" method="POST">
-                                {% csrf_token %}
-                                <button type="submit" style="background: {% if question.accepted_answer %}#e53e3e{% else %}#3182ce{% endif %}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">
-                                    {% if question.accepted_answer %}<i class="fas fa-unlock"></i> Mở khóa{% else %}<i class="fas fa-lock"></i> Khóa thảo luận{% endif %}
-                                </button>
-                            </form>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    {% if question.accepted_answer %}
-                    <div style="background: #e6fffa; border: 1px solid #b2f5ea; color: #2c7a7b; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 14px; margin-top: 15px;">
-                        <i class="fas fa-check-double"></i>
-                        <span><b>Câu hỏi đã được khóa:</b> Bài viết này đã có câu trả lời tốt nhất và đóng thảo luận.</span>
-                    </div>
-                    {% endif %}
-
-                    <div class="post-meta-pro" style="margin-top: 15px;">
-                        <div class="meta-item"><i class="far fa-calendar-alt"></i> <span>{{ question.creation_date|date:"d/m/Y" }}</span></div>
-                        <div class="meta-item"><i class="far fa-user"></i> <span>{{ question.own_user.username }}</span></div>
-                        <div class="meta-item"><i class="far fa-eye"></i> <span>{{ question.view_count|default:"0" }} lượt xem</span></div>
+                    <h1>{{ question.title }} {% if question.is_hidden %}(BỊ ẨN){% endif %}</h1>
+                    <div class="post-meta-pro">
+                        <div class="meta-item"><i class="far fa-calendar-alt"></i> {{ question.creation_date|date:"d/m/Y" }}</div>
+                        <div class="meta-item"><i class="far fa-eye"></i> {{ question.view_count }} lượt xem</div>
                     </div>
                 </header>
 
                 <div class="post-layout">
-                    <div class="post-content-area">
-                        <div class="main-text">{{ question.body|safe }}</div>
-                        <div class="tags-row">
-                            {% for tag in question.tags.all %}
-                                <a href="#" class="pro-tag">{{ tag.name }}</a>
-                            {% endfor %}
+                    <div class="main-text">{{ question.body|safe }}</div>
+                    <div class="interaction-bar">
+                        <div class="vote-group" style="display: flex; align-items: center; gap: 10px;">
+                            <a href="{% url 'vote' 'question' question.id 'up' %}" class="vote-btn-pro like {% if question.user_vote == 1 %}active{% endif %}">
+                                <i class="{% if question.user_vote == 1 %}fas{% else %}far{% endif %} fa-thumbs-up"></i>
+                                <span>Thích</span> <span class="count">{{ question.likes }}</span>
+                            </a>
+                            <a href="{% url 'vote' 'question' question.id 'down' %}" class="vote-btn-pro dislike {% if question.user_vote == -1 %}active{% endif %}">
+                                <i class="{% if question.user_vote == -1 %}fas{% else %}far{% endif %} fa-thumbs-down"></i>
+                                <span>Không thích</span> <span class="count">{{ question.dislikes }}</span>
+                            </a>
+                            <span class="score-display">Score: {{ question.score }}</span>
                         </div>
 
-                        <div class="interaction-bar">
-                            <div class="vote-group">
-                                <button class="vote-btn-pro like"><i class="fa-solid fa-thumbs-up"></i><span>Thích</span><span class="count">{{ question.score }}</span></button>
-                                <button class="vote-btn-pro dislike"><i class="fa-solid fa-thumbs-down"></i><span>Không thích</span></button>
-                            </div>
-
-                            <div class="action-right">
-                                <form action="{% url 'report_content' 'question' question.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn muốn báo cáo câu hỏi này?')">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="reason" value="Báo cáo câu hỏi">
-                                    <button type="submit" class="report-link-minimal" style="background:none; border:none; cursor:pointer; color:#6a737c;">🚩 Báo cáo</button>
-                                </form>
-                            </div>
+                        <div class="action-right">
+                            {% if request.user == question.own_user %}
+                                <a href="{% url 'toggle_lock_question' question.id %}" style="text-decoration: none; font-size: 13px; margin-right: 15px; color: #007bff;">
+                                    {% if question.accepted_answer %}<i class="fas fa-unlock"></i> Mở khóa{% else %}<i class="fas fa-lock"></i> Khóa câu hỏi{% endif %}
+                                </a>
+                            {% endif %}
+                            <form action="{% url 'report_content' 'question' question.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="report-link-minimal" style="background:none; border:none; color:#6a737c; cursor:pointer;">🚩 Báo cáo</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </section>
-            {% else %}
-            <div style="padding: 40px; text-align: center; background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px;">
-                <i class="fas fa-eye-slash" style="font-size: 30px; color: #cf1322;"></i>
-                <p style="margin-top: 15px; color: #cf1322; font-weight: bold;">Câu hỏi này đã bị ẩn do vi phạm tiêu chuẩn cộng đồng.</p>
-            </div>
             {% endif %}
 
             <section class="answers-wrapper">
-                <h3 class="section-title">{{ answers.count }} Câu trả lời</h3>
-
+                <h3 class="section-title">{{ total_answers_count }} Câu trả lời</h3>
                 {% for answer in answers %}
-                    {% if not answer.is_hidden or user.is_staff or request.user == question.own_user %}
-                    <div class="answer-card-pro" style="{% if answer.id == question.accepted_answer_id %}border: 2px solid #10b981; background-color: #f0fff4;{% endif %} {% if answer.is_hidden %}opacity: 0.7; border: 1px dashed #718096; background: #f8f9fa;{% endif %}">
-
-                        {% if answer.is_hidden %}
-                        <div style="color: #e53e3e; font-size: 12px; margin-bottom: 8px; font-weight: bold;"><i class="fas fa-eye-slash"></i> <span>NỘI DUNG NÀY ĐANG BỊ ẨN (Chỉ bạn và Admin thấy)</span></div>
+                    <div class="answer-card-pro {% if question.accepted_answer == answer %}accepted-border{% endif %}" style="margin-bottom: 20px; padding: 15px; border: 1px solid #eee; position: relative; {% if answer.is_hidden %}border: 2px dashed red; background: #fff1f0;{% endif %}">
+                        {% if question.accepted_answer == answer %}
+                            <span class="accepted-badge"><i class="fas fa-check-circle"></i> Câu trả lời hay nhất</span>
                         {% endif %}
-
-                        {% if answer.id == question.accepted_answer_id %}
-                        <div style="background: #10b981; color: white; display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 15px;"><i class="fas fa-check"></i> CÂU TRẢ LỜI HAY NHẤT</div>
-                        {% endif %}
-
-                        <div class="answer-header-pro">
-                            <div class="user-avatar-small">{{ answer.own_user.username|slice:":1"|upper }}</div>
-                            <div class="user-info-mini">
-                                <span class="username">{{ answer.own_user.username }}</span>
-                                <span class="date">{{ answer.creation_date|date:"d/m/Y H:i" }}</span>
-                            </div>
-                        </div>
-
                         <div class="answer-body-pro">{{ answer.body|safe }}</div>
-
-                        <div class="interaction-bar">
+                        <div class="interaction-bar" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div class="vote-group" style="display: flex; align-items: center; gap: 10px;">
+                                <a href="{% url 'vote' 'answer' answer.id 'up' %}" class="vote-btn-pro like {% if answer.user_vote == 1 %}active{% endif %}">
+                                    <i class="{% if answer.user_vote == 1 %}fas{% else %}far{% endif %} fa-thumbs-up"></i>
+                                    <span class="count">{{ answer.likes }}</span>
+                                </a>
+                                <a href="{% url 'vote' 'answer' answer.id 'down' %}" class="vote-btn-pro dislike {% if answer.user_vote == -1 %}active{% endif %}">
+                                    <i class="{% if answer.user_vote == -1 %}fas{% else %}far{% endif %} fa-thumbs-down"></i>
+                                    <span class="count">{{ answer.dislikes }}</span>
+                                </a>
+                                <span class="score-display">{{ answer.score }}</span>
+                            </div>
                             <div class="action-right">
-                                {% if request.user == question.own_user and not question.accepted_answer_id and not answer.is_hidden %}
-                                    <form action="{% url 'accept_answer' answer.id %}" method="POST" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" style="background: #10b981; color: white; border: none; padding: 5px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer;"><i class="fas fa-check"></i> Chấp nhận</button>
-                                    </form>
+                                {% if request.user == question.own_user and not question.accepted_answer %}
+                                    <a href="{% url 'accept_answer' answer.id %}" class="btn-accept-link"><i class="far fa-check-circle"></i> Chấp nhận</a>
                                 {% endif %}
-
-                                {% if user.is_staff %}
-                                    <a href="{% url 'toggle_hide_answer' answer.id %}" class="admin-link" style="margin-right: 10px; font-size: 13px;">
-                                        {% if answer.is_hidden %}<i class="fa-solid fa-eye"></i> Hiện{% else %}<i class="fa-solid fa-eye-slash"></i> Ẩn{% endif %}
-                                    </a>
+                                {% if user.is_staff or request.user == question.own_user %}
+                                    <a href="{% url 'toggle_hide_answer' answer.id %}" style="margin-right: 15px; text-decoration: none; font-size: 13px;">{% if answer.is_hidden %}Hiện{% else %}Ẩn{% endif %}</a>
                                 {% endif %}
-
                                 <form action="{% url 'report_content' 'answer' answer.id %}" method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="report-link-minimal">🚩 Báo cáo</button>
+                                    {% csrf_token %}<button type="submit" class="report-link-minimal" style="background:none; border:none; color:#6a737c; cursor:pointer;">🚩 Báo cáo</button>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
                 {% endfor %}
             </section>
 
-            {% if not question.accepted_answer %}
-            <section class="reply-container-pro">
-                <h4>Câu trả lời của bạn</h4>
-                <form method="post">
-                    {% csrf_token %}
-                    <textarea name="content" class="modern-textarea" placeholder="Nội dung câu trả lời..."></textarea>
-                    <div class="form-footer"><button type="submit" class="btn-submit-pro">Đăng câu trả lời</button></div>
-                </form>
-            </section>
-            {% else %}
-            <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 12px; border: 1px dashed #cbd5e0; margin-top: 20px; color: #718096;">
-                <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px;"></i>
-                <p>Câu hỏi này đã đóng. Không thể đăng thêm câu trả lời mới.</p>
-            </div>
-            {% endif %}
-        </main>
+            </main>
+
         <aside class="right-sidebar">
             <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
                 <h4 style="margin-top: 0; margin-bottom: 10px;">Thông tin</h4>
-                <p style="font-size: 13px; color: #6a737c;">Hãy tuân thủ quy tắc cộng đồng.</p>
+                <p style="font-size: 13px; color: #6a737c;">Ngày đăng: {{ question.creation_date|date:"d/m/Y" }}</p>
+                <p style="font-size: 13px; color: #6a737c;">Lượt xem: {{ question.view_count }}</p>
             </div>
         </aside>
     </div>
-    <script src="{% static 'app/js/ai_search.js' %}"></script>
 </body>
 </html>
