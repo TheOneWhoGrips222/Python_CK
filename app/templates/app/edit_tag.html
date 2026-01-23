@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa Tag - Admin</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'admin_dashboard' %}" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
+    </div>
+</nav>
+
+<div class="main-container">
+    <nav class="left-sidebar">
+        <ul class="nav-links">
+            <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fa-solid fa-chart-line"></i> Tổng quan</a></li>
+            <li><a href="{% url 'admin_tag' %}" class="nav-item active"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+        </ul>
+    </nav>
+
+    <main class="content-area">
+        <div class="admin-card" style="max-width: 600px; margin: 0 auto;">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Cập nhật thông tin Tag</h3>
+            </div>
+
+            <form method="POST" style="margin-top: 20px;">
+                {% csrf_token %}
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #6b7280;">Tên Tag (Không thể thay đổi):</label>
+                    <input type="text" value="{{ tag.name }}" readonly
+                           style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; background-color: #f9fafb; cursor: not-allowed; outline: none;">
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Mô tả Tag:</label>
+                    <textarea name="description" rows="6" placeholder="Nhập mô tả mới cho tag này..."
+                              style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; outline: none; box-sizing: border-box; resize: vertical; font-family: inherit;">{{ tag.description }}</textarea>
+                    <small style="color: #6b7280; display: block; margin-top: 5px;">Mô tả này giúp người dùng hiểu rõ hơn về chủ đề của tag.</small>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary-small" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                        Cập nhật mô tả
+                    </button>
+                    <a href="{% url 'admin_tag' %}" style="text-decoration: none; color: #6b7280; padding: 10px 20px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center;">
+                        Quay lại danh sách
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

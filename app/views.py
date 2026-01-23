@@ -686,3 +686,15 @@ def vote(request, content_type, content_id, vote_type):
 
     question_id = obj.id if content_type == 'question' else obj.question.id
     return redirect('question_detail', id=question_id)
+
+
+def edit_tag(request, tag_id):
+    tag = get_object_or_404(Tag, id=tag_id)
+
+    if request.method == "POST":
+        new_description = request.POST.get('description', '').strip()
+        tag.description = new_description
+        tag.save()
+        return redirect('admin_tag')
+
+    return render(request, 'app/edit_tag.html', {'tag': tag})
