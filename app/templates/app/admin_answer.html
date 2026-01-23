@@ -90,6 +90,7 @@
                 <thead>
                     <tr>
                         <th style="width: 80px;">ID</th>
+                        <th style="width: 80px;">ID câu hỏi</th>
                         <th>Người đăng</th>
                         <th>Nội dung câu trả lời</th>
                         <th>Thời gian</th>
@@ -101,6 +102,7 @@
                 {% for q in answers %}
                     <tr>
                         <td><span class="text-muted">#{{q.id}}</span></td>
+                        <td><span class="text-muted">#{{q.question.id}}</span></td>
                         <td><strong>{{q.own_user.username}}</strong></td>
                         <td>
                              <div class="truncate" style="max-width: 400px;">{{ q.body|striptags|truncatechars:100 }}</div>

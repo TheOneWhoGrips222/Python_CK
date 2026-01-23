@@ -66,4 +66,5 @@ urlpatterns = [
     path('report/<str:content_type>/<int:content_id>/', views.report_content, name='report_content'),
     path('question/<int:question_id>/toggle-lock/', views.toggle_lock_question, name='toggle_lock_question'),
     path('vote/<str:content_type>/<int:content_id>/<str:vote_type>/', views.vote, name='vote'),
+    path('admin-tag/edit/<int:tag_id>/', views.edit_tag, name='edit_tag'),
 ]

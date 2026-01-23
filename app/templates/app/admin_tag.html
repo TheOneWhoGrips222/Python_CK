@@ -91,7 +91,9 @@
                             </td>
                                 <td style="text-align: center;">
                             <div style="display: flex; justify-content: center; gap: 8px;">
-                                <button class="action-btn" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>
+                                <a href="{% url 'edit_tag' t.id %}" class="action-btn" title="Chỉnh sửa mô tả Tag" style="text-decoration: none; color: inherit;">
+                                <i class="fa-solid fa-eye"></i>
+                                </a>
                                 <a href="{% url 'delete-adtag' t.id %}"
                                    class="action-btn text-danger"
                                    onclick="return confirm('Bạn có chắc chắn muốn xóa Tag này?')"
