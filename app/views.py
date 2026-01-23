@@ -1,4 +1,5 @@
 from datetime import date
+import datetime  # Đã gộp từ nhánh mới
 from urllib import request
 
 from django.contrib import messages
@@ -9,23 +10,20 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from django.core.paginator import Paginator
 from django.utils import timezone
-from .models import Question, Answer, Tag , Vote, Report
+from .models import Question, Answer, Tag, Vote, Report
 from django.db.models import Count, Sum, Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .ai_search import find_similar_questions_ai
-<<<<<<< HEAD
-from .ai_tagging import suggest_tags_ai
+from .ai_tagging import suggest_tags_ai  # Giữ lại AI tagging
 import html
 from django.utils.html import strip_tags
-=======
-import datetime
-from django.db.models import Count
 
+# --- KẾT THÚC PHẦN XỬ LÝ CONFLICT IMPORT ---
 
->>>>>>> 14121f544dc30d8d5160438ebd901acfc62a6d25
 User = get_user_model()
+
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email")
@@ -37,8 +35,6 @@ class SignUpForm(UserCreationForm):
 
 def home(request):
     sort = request.GET.get('sort', 'newest')
-
-
     questions = Question.objects.all()
 
     if sort == 'hot':
@@ -53,14 +49,14 @@ def home(request):
     paginator = Paginator(questions, items_per_page)
     page_number = request.GET.get('page')
 
-
     questions = paginator.get_page(page_number)
 
     context = {
-        'questions': questions,  # Bây giờ 'questions' đã có thuộc tính .has_other_pages
+        'questions': questions,
         'current_sort': sort
     }
     return render(request, 'app/home.html', context)
+
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -81,6 +77,7 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'app/login.html', {'form': form})
 
+
 def register(request):
     if request.user.is_authenticated:
         return redirect('home')
@@ -93,20 +90,22 @@ def register(request):
         form = SignUpForm()
     return render(request, 'app/register.html', {'form': form})
 
+
 def logout_view(request):
     logout(request)
     return redirect('home')
+
 
 def question_detail(request, id):
     question = get_object_or_404(Question, id=id)
 
     if request.user.is_staff:
         answers = question.answers.all()
-
     elif request.user.is_authenticated:
         answers = question.answers.filter(Q(is_hidden=False) | Q(own_user=request.user))
     else:
         answers = question.answers.filter(is_hidden=False)
+
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('login')
@@ -124,17 +123,17 @@ def question_detail(request, id):
             return redirect('question_detail', id=id)
     return render(request, 'app/question.html', {'question': question, 'answers': answers})
 
+
 @login_required(login_url='login')
 def add_question(request):
     if request.method == 'POST':
         title = (request.POST.get('title') or "").strip()
         body = (request.POST.get('body') or "").strip()
-        tag_data = (request.POST.get('tags') or "").strip()  # user có thể bỏ trống
+        tag_data = (request.POST.get('tags') or "").strip()
 
         if not title or not body:
             return render(request, 'app/AddQuestion.html', {"error": "Vui lòng nhập tiêu đề và nội dung."})
 
-        # 1) Tạo câu hỏi trước
         question = Question.objects.create(
             title=title,
             body=body,
@@ -142,16 +141,13 @@ def add_question(request):
             creation_date=timezone.now()
         )
 
-        # 2) Manual tags (user nhập)
         manual_tags = []
         if tag_data:
             manual_tags = [t.strip().lower() for t in tag_data.replace(',', ' ').split() if t.strip()]
 
-        # 3) Clean text trước khi AI (loại HTML + unescape)
         clean_title = strip_tags(html.unescape(title)).strip()
         clean_body = strip_tags(html.unescape(body)).strip()
 
-        # 4) AI tags (tự gán)
         ai_suggestions = suggest_tags_ai(
             clean_title,
             clean_body,
@@ -160,18 +156,15 @@ def add_question(request):
         )
         ai_tags = [name for name, _score in ai_suggestions]
 
-        # 5) Merge manual + AI (unique)
         merged = []
         for t in manual_tags + ai_tags:
             t = (t or "").strip().lower()
             if t and t not in merged:
                 merged.append(t)
 
-        # ✅ số tag tối đa lưu/hiển thị (bạn muốn nhiều hơn 5 thì tăng lên)
         MAX_TAGS = 5
         merged = merged[:MAX_TAGS]
 
-        # 6) Save M2M + tags_raw
         raw_string = ""
         for tag_name in merged:
             tag_obj, _ = Tag.objects.get_or_create(name=tag_name)
@@ -185,18 +178,19 @@ def add_question(request):
 
     return render(request, 'app/AddQuestion.html')
 
+
 def tags_view(request):
     tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')
-    tag_count = Tag.objects.count();
+    tag_count = Tag.objects.count()
     paginator = Paginator(tags, 15)
     page_number = request.GET.get('page')
     tags = paginator.get_page(page_number)
-    return render(request, 'app/tag.html', {'tags': tags,'tagcount':tag_count})
+    return render(request, 'app/tag.html', {'tags': tags, 'tagcount': tag_count})
 
 
 def users_view(request):
     users = User.objects.all()
-    user_count = User.objects.count();
+    user_count = User.objects.count()
     items_per_page = 20
     paginator = Paginator(users, items_per_page)
     page_number = request.GET.get('page')
@@ -205,22 +199,15 @@ def users_view(request):
                'usercount': user_count}
     return render(request, 'app/user.html', context)
 
+
 @login_required(login_url='login')
 def user_profile(request, username):
-    # Lấy thông tin user dựa trên username từ URL
     profile_user = get_object_or_404(User, username=username)
 
-    # --- TÍNH TOÁN ĐIỂM ---
-
     q_score_sum = Question.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
-
-
     a_score_sum = Answer.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
 
-    # Tính tổng Reputation
     profile_user.reputation = (q_score_sum * 5) + (a_score_sum * 10)
-
-
 
     likes = Vote.objects.filter(question__own_user=profile_user, value=1).count() + \
             Vote.objects.filter(answer__own_user=profile_user, value=1).count()
@@ -228,12 +215,10 @@ def user_profile(request, username):
     dislikes = Vote.objects.filter(question__own_user=profile_user, value=-1).count() + \
                Vote.objects.filter(answer__own_user=profile_user, value=-1).count()
 
-
     profile_user.likes_count = likes
     profile_user.dislikes_count = dislikes
     profile_user.save()
 
-    # Lấy danh sách câu hỏi của user này
     user_questions = Question.objects.filter(own_user=profile_user).order_by('-creation_date')
 
     context = {
@@ -242,34 +227,32 @@ def user_profile(request, username):
     }
     return render(request, 'app/ManageUser.html', context)
 
+
 def question_page(request):
     questions = Question.objects.all().order_by('-creation_date').prefetch_related('tags')
-    tag_count = Tag.objects.count();
-    paginator = Paginator(questions, 15)  # Mỗi trang 15 câu
+    tag_count = Tag.objects.count()
+    paginator = Paginator(questions, 15)
     page_number = request.GET.get('page')
-    questions = paginator.get_page(page_number)  # Gán lại vào biến 'questions'
+    questions = paginator.get_page(page_number)
     user_count = User.objects.all().count()
     question_count = Question.objects.all().count()
 
     context = {'questions': questions,
                'user_count': user_count,
                'question_count': question_count,
-               'tagcount' : tag_count
+               'tagcount': tag_count
                }
-
-    return render(request, 'app/question-list.html',context)
+    return render(request, 'app/question-list.html', context)
 
 
 @staff_member_required(login_url='login')
 def admin_dashboard(request):
-    # 1. Thống kê cơ bản cho các ô Stat Box
     user_count = User.objects.count()
     question_count = Question.objects.count()
     answer_count = Answer.objects.count()
     report_count = Report.objects.count()
     tag_count = Tag.objects.count()
 
-    # 2. Logic biểu đồ Tăng trưởng (7 ngày qua)
     today = datetime.date.today()
     days = []
     counts = []
@@ -278,14 +261,12 @@ def admin_dashboard(request):
         days.append(d.strftime('%d/%m'))
         counts.append(Question.objects.filter(creation_date__date=d).count())
 
-    # 3. Logic biểu đồ Tốc độ phản hồi trung bình (Giờ)
     resp_days = []
     resp_values = []
     for i in range(6, -1, -1):
         d = today - datetime.timedelta(days=i)
         resp_days.append(d.strftime('%d/%m'))
 
-        # Lấy câu hỏi tạo trong ngày d và đã có câu trả lời
         qs_day = Question.objects.filter(creation_date__date=d, answers__isnull=False).distinct()
 
         if qs_day.exists():
@@ -299,15 +280,13 @@ def admin_dashboard(request):
         else:
             resp_values.append(0)
 
-    # 4. Logic biểu đồ Top Người dùng uy tín (Lấy trực tiếp từ trường reputation)
     top_users = User.objects.all().order_by('-reputation')[:5]
     user_labels = [u.username for u in top_users]
     user_reps = [u.reputation if u.reputation else 0 for u in top_users]
 
-    # 5. Dữ liệu bảng phụ
-    top_tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')[:5]
+    top_tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')[:7]
     questions = Question.objects.all().order_by('-creation_date')[:5]
-    tag_count = Tag.objects.count()
+
     context = {
         'user_count': user_count,
         'question_count': question_count,
@@ -321,22 +300,19 @@ def admin_dashboard(request):
         'user_labels': user_labels,
         'user_reps': user_reps,
         'top_tags': top_tags,
-        'tag_count': tag_count,
         'questions': questions,
     }
     return render(request, 'app/admin.html', context)
 
+
 def delete_question(request, id):
     Question.objects.filter(id=id).delete()
-    return redirect('admin_dashboard')
+    return redirect('admin_question')
+
 
 def admin_users(request):
-
     noi_dung_tim_kiem = request.GET.get('search', '')
-
-
     list_user = User.objects.all()
-
 
     if noi_dung_tim_kiem != "":
         list_user = list_user.filter(username__icontains=noi_dung_tim_kiem)
@@ -348,20 +324,16 @@ def admin_users(request):
         'users': users_paginated,
         'search_query': noi_dung_tim_kiem,
     }
+    return render(request, 'app/admin_user.html', context)
 
-    return render(request, 'app/admin_user.html',context)
 
 def admin_question(request):
-    # 1. Khởi tạo QuerySet
     questions_list = Question.objects.all().select_related('own_user')
-
-    # 2. Lấy dữ liệu từ GET
     search_val = request.GET.get('search', '').strip()
     follow_val = request.GET.get('folow', 'DEF')
     time_val = request.GET.get('time', 'new')
     status_val = request.GET.get('status', 'default')
 
-    # 3. Logic Tìm kiếm
     if search_val:
         if follow_val == 'ID':
             questions_list = questions_list.filter(id__icontains=search_val)
@@ -372,19 +344,15 @@ def admin_question(request):
         elif follow_val == 'TITLE':
             questions_list = questions_list.filter(title__icontains=search_val)
 
-    # 4. Logic Lọc trạng thái (Dùng cách này để không bị lỗi FieldError)
     if status_val == 'answered':
         questions_list = questions_list.filter(answers__isnull=False).distinct()
     elif status_val == 'notans':
-        # Lấy những câu hỏi mà bảng Answer không có dữ liệu trỏ về
         questions_list = questions_list.filter(answers__isnull=True)
     elif status_val == 'report':
         questions_list = questions_list.filter(reports__isnull=False).distinct()
 
-    # 5. Sắp xếp
     questions_list = questions_list.order_by('creation_date' if time_val == 'old' else '-creation_date')
 
-    # 6. Phân trang
     paginator = Paginator(questions_list, 15)
     page_number = request.GET.get('page')
     questions_obj = paginator.get_page(page_number)
@@ -398,23 +366,23 @@ def admin_question(request):
     }
     return render(request, 'app/admin_question.html', context)
 
+
 def delete_admin_question(request, id):
     Question.objects.filter(id=id).delete()
     return redirect('admin_question')
 
+
 def toggle_staff(request, user_id):
     user = get_object_or_404(User, id=user_id)
-
-
-    if user.is_staff == True:
+    if user.is_staff:
         user.is_staff = False
         messages.success(request, f"Đã hạ cấp quyền Staff của {user.username}")
     else:
         user.is_staff = True
         messages.success(request, f"Đã thăng cấp {user.username} lên làm Staff")
-
     user.save()
     return redirect('admin_users')
+
 
 def toggle_active(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -427,11 +395,10 @@ def toggle_active(request, user_id):
     user.save()
     return redirect('admin_users')
 
+
 def admin_tag(request):
     noi_dung_tim_kiem = request.GET.get('search', '')
-
     list_tag = Tag.objects.all().order_by('-id')
-
     if noi_dung_tim_kiem != "":
         list_tag = list_tag.filter(name__icontains=noi_dung_tim_kiem)
 
@@ -442,42 +409,31 @@ def admin_tag(request):
         'tags': tags_paginated,
         'search_query': noi_dung_tim_kiem,
     }
-
     return render(request, 'app/admin_tag.html', context)
+
+
 def del_tag(request, id):
     Tag.objects.filter(id=id).delete()
     return redirect('admin_tag')
 
-def admin_answer(request):
-    # 1. Khởi tạo QuerySet
-    answer_list = Answer.objects.all()
 
-    # 2. Lấy dữ liệu từ GET
+def admin_answer(request):
+    answer_list = Answer.objects.all()
     search_val = request.GET.get('search', '').strip()
     follow_val = request.GET.get('folow', 'DEF')
     time_val = request.GET.get('time', 'new')
     status_val = request.GET.get('status', 'default')
 
-    # 3. Logic Tìm kiếm
-    if search_val:
-        if follow_val == 'USER':
-            answer_list = answer_list.filter(own_user__username__icontains=search_val)
+    if search_val and follow_val == 'USER':
+        answer_list = answer_list.filter(own_user__username__icontains=search_val)
 
-
-    # 4. Logic Lọc trạng thái (Dùng cách này để không bị lỗi FieldError)
     if status_val == 'hidden':
-
         answer_list = answer_list.filter(is_hidden=True)
     elif status_val == 'active':
-
         answer_list = answer_list.filter(is_hidden=False)
 
-
-
-    # 5. Sắp xếp
     answer_list = answer_list.order_by('creation_date' if time_val == 'old' else '-creation_date')
 
-    # 6. Phân trang
     paginator = Paginator(answer_list, 15)
     page_number = request.GET.get('page')
     answer_obj = paginator.get_page(page_number)
@@ -491,53 +447,72 @@ def admin_answer(request):
     }
     return render(request, 'app/admin_answer.html', context)
 
+
 def del_answer(request, id):
     Answer.objects.filter(id=id).delete()
     return redirect('admin_answer')
+
+
 def toggle_answer(request, id):
     answer = get_object_or_404(Answer, id=id)
-    if(answer.is_hidden == False):
-        answer.is_hidden = True
-    else:
-        answer.is_hidden = False
+    answer.is_hidden = not answer.is_hidden
     answer.save()
     return redirect('admin_answer')
 
-def search_similar_questions(request):
-    """API trả về JSON danh sách câu hỏi tương tự cho tính năng Autocomplete"""
-    query = request.GET.get('q', '')
-    if len(query) > 2:
-        # Tìm các câu hỏi có tiêu đề chứa từ khóa (không phân biệt hoa thường)
-        questions = Question.objects.filter(title__icontains=query)[:5]
-        results = []
-        for q in questions:
-            results.append({
-                'title': q.title,
-                'url': reverse('question_detail', args=[q.id]), # Tạo link đến câu hỏi đó
-                'answers': q.answers.count() # Số câu trả lời hiện có
-            })
-        return JsonResponse({'results': results})
-    return JsonResponse({'results': []})
 
-# Ẩn câu trả lời (cho admin)
+
+def admin_report(request):
+
+    reports_list = Report.objects.all().select_related('own_user', 'question', 'answer')
+
+
+    search_val = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', 'all')
+
+
+    if search_val:
+        reports_list = reports_list.filter(own_user__username__icontains=search_val)
+
+
+    if status_filter != 'all':
+        reports_list = reports_list.filter(status=status_filter)
+
+    reports_list = reports_list.order_by('-creation_date')
+
+
+    paginator = Paginator(reports_list, 15)
+    page_number = request.GET.get('page')
+    reports_obj = paginator.get_page(page_number)
+
+    context = {
+        'reports': reports_obj,
+        'search_val': search_val,
+        'status_filter': status_filter,
+    }
+    return render(request, 'app/admin_report.html', context)
+
+
+def resolve_report(request, id):
+    report = get_object_or_404(Report, id=id)
+    report.status = 'Resolved'
+    report.save()
+    messages.success(request, f"Đã đánh dấu báo cáo #{id} là đã xử lý.")
+    return redirect('admin_report')
+
 @staff_member_required(login_url='login')
 def toggle_hide_answer(request, id):
     answer = get_object_or_404(Answer, id=id)
     answer.is_hidden = not answer.is_hidden
     answer.save()
-
     status = "đã ẩn" if answer.is_hidden else "đã hiện lại"
     messages.success(request, f"Câu trả lời {status}.")
     return redirect('question_detail', id=answer.question.id)
 
-# Yêu cầu đăng nhập
+
 @login_required
 def accept_answer(request, id):
-    # Lấy câu trả lời theo id
     answer = get_object_or_404(Answer, id=id)
     question = answer.question
-
-    # Kiểm tra bảo mật: chỉ người tạo câu hỏi mới được quyền chấp nhận
     if request.user != question.own_user:
         return redirect('question_detail', id=question.id)
 
@@ -545,7 +520,6 @@ def accept_answer(request, id):
         question.accepted_answer = None
     else:
         question.accepted_answer = answer
-
     question.save()
     return redirect('question_detail', id=question.id)
 
@@ -553,24 +527,13 @@ def accept_answer(request, id):
 def search_similar_questions(request):
     """API trả về JSON danh sách câu hỏi tương tự dùng AI"""
     query = request.GET.get('q', '')
-
-
     if len(query) > 5:
-
-        # Lấy tất cả câu hỏi để so sánh
         all_questions = list(Question.objects.all().order_by('-creation_date')[:500])
-
-        # Gọi hàm AI xử lý
-
         ai_results = find_similar_questions_ai(query, all_questions, top_k=5, threshold=0.5)
-
         results = []
         for item in ai_results:
-
-
             q = item['question']
             similarity_percent = round(item['score'] * 100)
-
             results.append({
                 'title': q.title,
                 'url': reverse('question_detail', args=[q.id]),
@@ -578,19 +541,15 @@ def search_similar_questions(request):
                 'similarity': similarity_percent
             })
         return JsonResponse({'results': results})
+    return JsonResponse({'results': []})
 
 
 @login_required
 def manage_account(request):
-
     user = request.user
-
-
     user_questions = Question.objects.filter(own_user=user).order_by('-creation_date')
 
-
     if request.method == 'POST':
-
         new_email = request.POST.get('email')
         if new_email:
             user.email = new_email
@@ -604,32 +563,57 @@ def manage_account(request):
     }
     return render(request, 'app/ManageUser.html', context)
 
+
 @login_required(login_url='login')
-def report_answer(request, id):
-    answer = get_object_or_404(Answer, id=id)
+def report_content(request, content_type, content_id):
+    # content_type sẽ là 'question' hoặc 'answer'
+    reason = request.POST.get('reason', 'Nội dung không phù hợp')
 
-    if request.method == 'POST':
-        reason = request.POST.get('reason', 'Spam/Nội dung rác')
-        existing_report = Report.objects.filter(own_user=request.user, answer=answer).exists()
-        if existing_report:
-            messages.warning(request, "Bạn đã báo cáo câu trả lời này rồi!")
-            return redirect('question_detail', id=answer.question.id)
+    if content_type == 'question':
+        obj = get_object_or_404(Question, id=content_id)
+        q_id = obj.id
+        report_filter = {'question': obj}
+    else:
+        obj = get_object_or_404(Answer, id=content_id)
+        q_id = obj.question.id
+        report_filter = {'answer': obj}
 
+    # Kiểm tra xem đã báo cáo chưa
+    if Report.objects.filter(own_user=request.user, **report_filter).exists():
+        messages.warning(request, "Bạn đã báo cáo nội dung này rồi!")
+    else:
         Report.objects.create(
             own_user=request.user,
-            answer=answer,
             reason=reason,
             status='Pending',
+            **report_filter
         )
 
-        report_count = answer.reports.count()
-
-        if report_count > 3 and not answer.is_hidden:
-            answer.is_hidden = True
-            answer.save()
-            messages.warning(request, "Nội dung này đã bị ẩn do nhận nhiều báo cáo từ cộng đồng.")
+        # Logic tự động ẩn nếu bị báo cáo nhiều (áp dụng cho cả 2)
+        report_count = Report.objects.filter(**report_filter).count()
+        if report_count > 3:
+            obj.is_hidden = True  # Đảm bảo Model Question cũng có trường is_hidden
+            obj.save()
+            messages.warning(request, "Nội dung đã bị ẩn do nhận nhiều báo cáo.")
         else:
             messages.success(request, f"Cảm ơn bạn đã báo cáo. (Hiện có {report_count} báo cáo)")
 
-    return redirect('question_detail', id=answer.question.id)
+    return redirect('question_detail', id=q_id)
 
+
+def toggle_lock_question(request, question_id):
+    #Đóng mở câu trả lời
+    question = get_object_or_404(Question, id=question_id)
+    #Người dặt mới dc quyền
+    if request.user == question.own_user:
+        if question.accepted_answer:
+            question.accepted_answer = None
+            messages.success(request, "Đã mở khóa câu hỏi thành công.")
+        else:
+            messages.warning(request, "Bạn cần chọn một câu trả lời đúng để khóa thảo luận.")
+
+        question.save()
+    else:
+        messages.error(request, "Bạn không có quyền thực hiện thao tác này.")
+
+    return redirect('question_detail', id=question.id)
