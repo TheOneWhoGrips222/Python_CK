@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo - DevCommunity ADMIN</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
+        <div class="user-actions">
+            <span class="admin-name">Xin chào, Quản trị viên</span>
+            <div class="user-avatar-placeholder">{{ request.user.username }}</div>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    <nav class="left-sidebar">
+        <ul class="nav-links">
+            <li><a href="{% url 'admin_dashboard' %}" class="nav-item"><i class="fa-solid fa-chart-line"></i> Tổng quan</a></li>
+            <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
+            <li>
+                <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
+                <ul class="sub-nav">
+                    <li><a href="{% url 'admin_question' %}" class="nav-item"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
+                    <li><a href="{% url 'admin_answer' %}" class="nav-item"><i class="fa-solid fa-comments"></i> Câu trả lời</a></li>
+                    <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
+                    <li><a href="{% url 'admin_tag' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
+                </ul>
+            </li>
+            <li>
+                <div class="nav-section-title">HỆ THỐNG</div>
+                <ul class="sub-nav">
+                    <li><a href="{% url 'admin_report' %}" class="nav-item active"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
+                    <li><a href="{% url 'logout' %}" class ="nav-item"><i class="fa-solid fa-door-open"></i> Đăng xuất</a> </li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="content-area">
+        <div class="admin-card">
+            <div class="card-header">
+                <h3>Danh sách báo cáo vi phạm</h3>
+                <span class="badge red">Tổng: {{ reports.paginator.count }}</span>
+            </div>
+
+            <form method="GET" action="{% url 'admin_report' %}">
+                <div class="filter-section" style="display: flex; gap: 10px; margin-bottom: 25px; align-items: center; background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                    <div class="search-box" style="flex-grow: 1; position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                        <input type="text" name="search" value="{{ search_val }}" placeholder="Tìm người báo cáo..." style="width: 80%; padding: 10px 10px 10px 35px; border: 1px solid #d1d5db; border-radius: 6px;">
+                    </div>
+
+                    <select name="status" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 150px;">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Tất cả trạng thái</option>
+                        <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Chờ xử lý</option>
+                        <option value="Resolved" {% if status_filter == 'Resolved' %}selected{% endif %}>Đã xử lý</option>
+                    </select>
+
+                    <button type="submit" class="action-btn" style="background: var(--primary-color); color: white; border: none; padding: 0 20px; height: 42px; border-radius: 6px; cursor: pointer;">
+                        <i class="fa-solid fa-filter"></i> Lọc
+                    </button>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th>Người báo cáo</th>
+                            <th>Nội dung bị báo cáo</th>
+                            <th>Lý do</th>
+                            <th>Ngày báo</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align: center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in reports %}
+                        <tr>
+                            <td><span class="text-muted">#{{ r.id }}</span></td>
+                            <td><strong>{{ r.own_user.username }}</strong></td>
+                            <td>
+                                {% if r.question %}
+                                    <span class="badge blue" style="font-size: 10px;">CÂU HỎI</span>
+                                    <div class="truncate" style="max-width: 300px;">{{ r.question.title }}</div>
+                                {% elif r.answer %}
+                                    <span class="badge green" style="font-size: 10px;">TRẢ LỜI</span>
+                                    <div class="truncate" style="max-width: 300px;">{{ r.answer.body|striptags }}</div>
+                                {% endif %}
+                            </td>
+                            <td><span class="text-danger">{{ r.reason }}</span></td>
+                            <td>{{ r.creation_date|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if r.status == 'Pending' %}
+                                    <span class="badge orange">Chờ xử lý</span>
+                                {% else %}
+                                    <span class="badge green">Đã giải quyết</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; justify-content: center; gap: 8px;">
+                                    {% if r.question %}
+                                        <a href="{% url 'question_detail' r.question.id %}" class="action-btn" title="Xem nội dung"><i class="fa-solid fa-eye"></i></a>
+                                    {% elif r.answer %}
+                                        <a href="{% url 'question_detail' r.answer.question.id %}" class="action-btn" title="Xem nội dung"><i class="fa-solid fa-eye"></i></a>
+                                    {% endif %}
+
+                                    {% if r.status == 'Pending' %}
+                                        <a href="{% url 'resolve_report' r.id %}" class="action-btn" style="color: #10b981;" onclick="return confirm('Đánh dấu báo cáo này đã xử lý xong?')">
+                                            <i class="fa-solid fa-check"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="7" style="text-align: center; padding: 30px;">Không có báo cáo nào khớp với bộ lọc.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if reports.has_other_pages %}
+            <div class="pagination-container" style="margin-top: 25px; display: flex; justify-content: center; gap: 5px;">
+                {% if reports.has_previous %}
+                    <a href="?page={{ reports.previous_page_number }}&search={{ search_val }}&status={{ status_filter }}" class="action-btn"><i class="fa-solid fa-chevron-left"></i></a>
+                {% endif %}
+
+                {% for num in reports.paginator.page_range %}
+                    {% if reports.number == num %}
+                        <span class="action-btn" style="background: var(--primary-color); color: white;">{{ num }}</span>
+                    {% elif num > reports.number|add:'-3' and num < reports.number|add:'3' %}
+                        <a href="?page={{ num }}&search={{ search_val }}&status={{ status_filter }}" class="action-btn">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if reports.has_next %}
+                    <a href="?page={{ reports.next_page_number }}&search={{ search_val }}&status={{ status_filter }}" class="action-btn"><i class="fa-solid fa-chevron-right"></i></a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

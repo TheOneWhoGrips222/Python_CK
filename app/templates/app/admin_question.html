@@ -2,182 +2,71 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý câu hỏi - DevCommunity ADMIN</title>
+    <title>{{ question.title }} - DevCommunity</title>
     {% load static %}
+    <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'app/css/admin.css' %}">
 </head>
 <body>
-
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="#" class="logo"><i class="fas fa-code" style="color: #f48225;"></i> DevCommunity <span class="admin-tag">ADMIN</span></a>
-        <div class="user-actions">
-            <span class="admin-name">Xin chào, Quản trị viên</span>
-            <div class="user-avatar-placeholder">{{ request.user.username }}</div>
-        </div>
-    </div>
-</nav>
-
-<div class="main-container">
-    <nav class="left-sidebar">
-        <ul class="nav-links">
-            <li>
-                <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                    <i class="fa-solid fa-chart-line"></i> Tổng quan
-                </a>
-
-            </li>
-            <li><a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Trang chủ</a></li>
-            <li>
-                <div class="nav-section-title">QUẢN LÝ NỘI DUNG</div>
-                <ul class="sub-nav">
-
-                    <li><a href="{% url 'admin_question' %}" class="nav-item active"><i class="fa-solid fa-question-circle"></i> Câu hỏi</a></li>
-                     <li><a href="{% url 'admin_answer' %}" class="nav-item "><i class="fa-solid fa-comments"></i></i> Câu trả lời</a></li>
-                    <li><a href="{% url 'admin_users' %}" class="nav-item"><i class="fa-solid fa-users"></i> Người dùng</a></li>
-                    <li><a href="{% url 'admin_tag' %}" class="nav-item"><i class="fa-solid fa-tags"></i> Thẻ (Tags)</a></li>
-                </ul>
-            </li>
-            <li>
-                <div class="nav-section-title">HỆ THỐNG</div>
-                <ul class="sub-nav">
-                    <li><a href="#" class="nav-item"><i class="fa-solid fa-flag"></i> Báo cáo</a></li>
-                    <li><a href="{% url 'logout' %}" class ="nav-item"><i class="fa-solid fa-door-open"></i> Đăng xuất</a> </li>
-                </ul>
-            </li>
-        </ul>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="logo">
+                <i class="fas fa-code" style="color: #f48225;"></i> DevCommunity
+            </a>
+            </div>
     </nav>
 
-   <main class="content-area">
-    <div class="admin-card">
-        <div class="card-header">
-            <h3>Quản lý câu hỏi</h3>
-            <span class="badge blue">Tổng số: {{ questions.paginator.count }}</span>
-        </div>
-        <form method="GET" action="{% url 'admin_question' %}">
-    <div class="filter-section" style="display: flex; gap: 10px; margin-bottom: 25px; align-items: center; background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #eee; flex-wrap: nowrap;">
+    <div class="main-container">
+        <main class="main-content-upgraded">
+            <section class="question-card">
+                <header class="post-header-pro">
+                    <h1>{{ question.title }}</h1>
+                    {% if question.accepted_answer_id %}
+                    <div style="background: #e6fffa; border: 1px solid #b2f5ea; color: #2c7a7b; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                        <i class="fas fa-check-double"></i> Câu hỏi đã tìm được câu trả lời tốt nhất.
+                    </div>
+                    {% endif %}
+                </header>
 
-        <div class="search-box" style="width: 280px; flex-shrink: 0; position: relative;">
-            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
-            <input type="text" name="search" value="{{ search_val|default:'' }}" placeholder="Tìm kiếm..."
-                   style="width: 80%; padding: 10px 10px 10px 35px; border: 1px solid #d1d5db; border-radius: 6px; outline: none;">
-        </div>
+                <div class="post-layout">
+                    <div class="post-content-area">
+                        <div class="main-text">{{ question.body|safe }}</div>
 
-        <select name="folow" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 140px;">
-            <option value="DEF" {% if follow_val == 'DEF' %}selected{% endif %}>Mặc định</option>
-            <option value="ID" {% if follow_val == 'ID' %}selected{% endif %}>Theo ID</option>
-            <option value="USER" {% if follow_val == 'USER' %} selected {% endif %}>Theo USERNAME</option>
-            <option value="TITLE" {% if follow_val == 'TITLE' %}selected{% endif %}>Theo Tiêu đề</option>
-            <option value="TAG" {% if follow_val == 'TAG' %}selected{% endif %}>Theo Tag</option>
-        </select>
-
-        <select name="time" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 140px;">
-            <option value="new" {% if time_val == 'new' %}selected{% endif %}>Mới nhất</option>
-            <option value="old" {% if time_val == 'old' %}selected{% endif %}>Cũ nhất</option>
-        </select>
-
-        <select name="status" style="padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; background: white; min-width: 150px;">
-            <option value="default" {% if status_val == 'default' %}selected{% endif %}>Tất cả trạng thái</option>
-            <option value="answered" {% if status_val == 'answered' %}selected{% endif %}>Đã trả lời</option>
-            <option value="notans" {% if status_val == 'notans' %}selected{% endif %}>Chưa trả lời</option>
-            <option value="report" {% if status_val == 'report' %}selected{% endif %}>Bị báo cáo</option>
-        </select>
-
-        <button type="submit" class="action-btn" style="background: var(--primary-color); color: white; border: none; padding: 0 20px; height: 42px; border-radius: 6px; cursor: pointer; flex-shrink: 0;">
-            <i class="fa-solid fa-filter"></i> Lọc
-        </button>
-    </div>
-</form>
-        <div class="table-responsive">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th style="width: 80px;">ID</th>
-                        <th>Người đăng</th>
-                        <th>Nội dung câu hỏi</th>
-                        <th>Thời gian</th>
-                        <th>Trạng thái</th>
-                        <th style="text-align: center;">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for q in questions %}
-                    <tr>
-                        <td><span class="text-muted">#{{q.id}}</span></td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-
-                                <strong>{{q.own_user.username}}</strong>
+                        <div class="interaction-bar">
+                            <div class="vote-group">
+                                <button class="vote-btn-pro like"><i class="fa-solid fa-thumbs-up"></i> <span>{{ question.score }}</span></button>
                             </div>
-                        </td>
-                        <td>
-                            <div class="truncate" style="max-width: 400px; font-weight: 500;">{{q.title}}</div>
-<div class="tag-container" style="margin-top: 5px;">
-        {% for tag in q.tags.all %}
-            <span style="background: #e1ecf4; color: #39739d; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 4px;">
-                {{ tag.name }}
-            </span>
-        {% empty %}
-            <small class="text-muted">Không có tag</small>
-        {% endfor %}
-    </div>
-                        <td>{{q.creation_date|date:"d/m/Y"}}<br><small class="text-muted">{{q.creation_date|time:"H:i"}}</small></td>
- <td>
-    {% with status=q.get_status_display %}
-        {% if status == 'reported' %}
-            <span class="badge red">Bị báo cáo</span>
-        {% elif status == 'answered' %}
-            <span class="badge green">Đã trả lời</span>
-        {% else %}
-            <span class="badge orange">Chờ xử lý</span>
-        {% endif %}
-    {% endwith %}
-</td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; justify-content: center; gap: 8px;">
-                                <button class="action-btn" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>
-                                <a href="{% url 'delete_question' q.id %}"
-                                   class="action-btn text-danger"
-                                   onclick="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')"
-                                   title="Xóa câu hỏi">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
+
+                            <div class="action-right">
+                                <form action="{% url 'report_content' 'question' question.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Báo cáo câu hỏi này?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="report-link-minimal" style="background:none; border:none; color:#6a737c; cursor:pointer;">🚩 Báo cáo</button>
+                                </form>
                             </div>
-                        </td>
-                    </tr>
-                {% endfor%}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-{% if questions.has_other_pages %}
-<div class="pagination-container" style="margin-top: 25px; display: flex; justify-content: center; align-items: center; gap: 5px; padding-bottom: 20px;">
+            <section class="answers-wrapper">
+                <h3 class="section-title">{{ answers.count }} Câu trả lời</h3>
 
-    {% if questions.has_previous %}
-        <a href="?page=1&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-angles-left"></i></a>
-        <a href="?page={{ questions.previous_page_number }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-chevron-left"></i></a>
-    {% endif %}
+                {% for answer in answers %}
+                <div class="answer-card-pro" style="{% if answer.id == question.accepted_answer_id %}border: 2px solid #10b981;{% endif %}">
+                    <div class="answer-body-pro">{{ answer.body|safe }}</div>
 
-    {% for num in questions.paginator.page_range %}
-        {% if questions.number == num %}
-            <span class="action-btn" style="background: var(--primary-color); color: white; border: none;">{{ num }}</span>
-        {% elif num > questions.number|add:'-3' and num < questions.number|add:'3' %}
-            <a href="?page={{ num }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn" style="text-decoration: none; color: inherit;">{{ num }}</a>
-        {% endif %}
-    {% endfor %}
-
-    {% if questions.has_next %}
-        <a href="?page={{ questions.next_page_number }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-chevron-right"></i></a>
-        <a href="?page={{ questions.paginator.num_pages }}&search={{ search_val }}&folow={{ follow_val }}&time={{ time_val }}&status={{ status_val }}" class="action-btn"><i class="fa-solid fa-angles-right"></i></a>
-    {% endif %}
-
-</div>
-{% endif %}
+                    <div class="interaction-bar">
+                        <div class="action-right">
+                            <form action="{% url 'report_content' 'answer' answer.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Báo cáo câu trả lời này?')">
+                                {% csrf_token %}
+                                <button type="submit" class="report-link-minimal">🚩 Báo cáo</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </section>
+        </main>
     </div>
-</main>
-</div>
-
 </body>
 </html>

@@ -59,7 +59,10 @@ urlpatterns = [
     path('admin-answer/',views.admin_answer, name='admin_answer'),
     path('delete-adanswer/<int:id>/', views.del_answer, name='delete-adanswer'),
     path('toggle-answer/<int:id>/', views.toggle_answer, name='toggle-answer'),
+    path('admin-report/', views.admin_report, name='admin_report'),
+    path('resolve-report/<int:id>/', views.resolve_report, name='resolve_report'),
 
     path('answer/toggle-hide/<int:id>/', views.toggle_hide_answer, name='toggle_hide_answer'),
-    path('answer/report/<int:id>/', views.report_answer, name='report_answer'),
+    path('report/<str:content_type>/<int:content_id>/', views.report_content, name='report_content'),
+    path('question/<int:question_id>/toggle-lock/', views.toggle_lock_question, name='toggle_lock_question'),
 ]
