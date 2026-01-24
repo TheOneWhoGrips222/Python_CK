@@ -75,9 +75,7 @@
                     <div class="user-name" style="font-weight: bold; margin-bottom: 5px;">
                         <a href="{% url 'user_profile' u.username %}" style="color: #0074cc; text-decoration: none;">{{ u.username }}</a>
                     </div>
-                    <div class="user-location" style="font-size: 0.8rem; color: #6a737c; margin-bottom: 5px;">
-                        <i class="fa-solid fa-location-dot"></i> Vietnam
-                    </div>
+
                     <div class="user-stats" style="font-size: 0.85rem; font-weight: bold; color: #3b4045;">
                         {{ u.reputation|default:0 }} Điểm Uy Tín
                     </div>

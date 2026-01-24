@@ -20,10 +20,40 @@ from .ai_tagging import suggest_tags_ai  # Giữ lại AI tagging
 import html
 from django.utils.html import strip_tags
 
-# --- KẾT THÚC PHẦN XỬ LÝ CONFLICT IMPORT ---
+
 
 User = get_user_model()
 
+
+def cap_nhat_reputation_he_thong(user, hanh_dong, nguoi_thuc_hien=None):
+    """
+    hanh_dong: 'up_q', 'down_q', 'up_a', 'down_a', 'accept', 'unaccept', 'cancel_vote'
+    """
+    if not user: return
+
+    # BẢNG ĐIỂM QUY ĐỊNH
+    bang_diem = {
+        'up_q': 5,  # like câu hỏi
+        'up_a': 10,  # like câu trả lời
+        'down_q': -2,  # Bị dislike câu hỏi
+        'down_a': -2,  # Bị dislike câu trả lời
+        'accept': 15,  # Được chọn là câu trả lời đúng
+        'unaccept': -15,  # Bị bỏ chọn câu trả lời đúng
+    }
+
+    diem_thay_doi = bang_diem.get(hanh_dong, 0)
+
+    # 1. Cập nhật cho người Đặt
+    user.reputation = max(0, user.reputation + diem_thay_doi)
+    user.save(update_fields=['reputation'])
+
+    # 2. Logic phụ cho người trả lời
+    if nguoi_thuc_hien and nguoi_thuc_hien != user:
+        if hanh_dong in ['down_q', 'down_a']:
+            nguoi_thuc_hien.reputation = max(0, nguoi_thuc_hien.reputation - 1)  # Phạt người downvote
+        elif hanh_dong == 'accept':
+            nguoi_thuc_hien.reputation += 2  # Thưởng người chọn vì đã giúp cộng đồng
+        nguoi_thuc_hien.save(update_fields=['reputation'])
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email")
@@ -110,7 +140,7 @@ def question_detail(request, id):
         viewed_questions.append(id)
         request.session['viewed_questions'] = viewed_questions
 
-    # TÍNH TOÁN ĐIỂM CHO CÂU HỎI
+
     question.likes = question.votes.filter(value=1).count()
     question.dislikes = question.votes.filter(value=-1).count()
     question.score = question.likes - question.dislikes  # Điểm = Like - Dislike
@@ -122,7 +152,7 @@ def question_detail(request, id):
         if user_q_vote:
             question.user_vote = user_q_vote.value
 
-    # Lọc danh sách câu trả lời (giữ nguyên logic staff/user của bạn)
+
     if request.user.is_staff:
         answers_list = question.answers.all().order_by('-creation_date')
     elif request.user.is_authenticated:
@@ -168,11 +198,19 @@ def add_question(request):
     if request.method == 'POST':
         title = (request.POST.get('title') or "").strip()
         body = (request.POST.get('body') or "").strip()
-        tag_data = (request.POST.get('tags') or "").strip()
+        tag_data = (request.POST.get('tags') or "").strip()  # user có thể bỏ trống
 
         if not title or not body:
             return render(request, 'app/AddQuestion.html', {"error": "Vui lòng nhập tiêu đề và nội dung."})
 
+        if Question.objects.filter(title__iexact=title).exists():
+            return render(request, 'app/AddQuestion.html',{
+                "error": "Câu hỏi này đã tồn tại trên hệ thống. Vui lòng sử dụng tính năng tìm kiếm hoặc đặt một tiêu đề khác.",
+                "old_title": title,
+                "old_body": body,
+            })
+
+        # 1) Tạo câu hỏi trước
         question = Question.objects.create(
             title=title,
             body=body,
@@ -180,13 +218,16 @@ def add_question(request):
             creation_date=timezone.now()
         )
 
+        # 2) Manual tags (user nhập)
         manual_tags = []
         if tag_data:
             manual_tags = [t.strip().lower() for t in tag_data.replace(',', ' ').split() if t.strip()]
 
+        # 3) Clean text trước khi AI (loại HTML + unescape)
         clean_title = strip_tags(html.unescape(title)).strip()
         clean_body = strip_tags(html.unescape(body)).strip()
 
+        # 4) AI tags (tự gán)
         ai_suggestions = suggest_tags_ai(
             clean_title,
             clean_body,
@@ -195,15 +236,18 @@ def add_question(request):
         )
         ai_tags = [name for name, _score in ai_suggestions]
 
+        # 5) Merge manual + AI (unique)
         merged = []
         for t in manual_tags + ai_tags:
             t = (t or "").strip().lower()
             if t and t not in merged:
                 merged.append(t)
 
+        # số tag tối đa lưu/hiển thị (bạn muốn nhiều hơn 5 thì tăng lên)
         MAX_TAGS = 5
         merged = merged[:MAX_TAGS]
 
+        # 6) Save M2M + tags_raw
         raw_string = ""
         for tag_name in merged:
             tag_obj, _ = Tag.objects.get_or_create(name=tag_name)
@@ -219,12 +263,24 @@ def add_question(request):
 
 
 def tags_view(request):
-    tags = Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')
-    tag_count = Tag.objects.count()
+    query = request.GET.get('search', '')
+    tags = Tag.objects.all()
+
+    if query:
+        tags = tags.filter(name__icontains=query)
+
+    tags = tags.annotate(num_questions=Count('questions')).order_by('-num_questions')
+    tag_count = tags.count()
+
     paginator = Paginator(tags, 15)
     page_number = request.GET.get('page')
     tags = paginator.get_page(page_number)
-    return render(request, 'app/tag.html', {'tags': tags, 'tagcount': tag_count})
+
+    return render(request, 'app/tag.html', {
+        'tags': tags,
+        'tagcount': tag_count,
+        'query': query
+    })
 
 
 def users_view(request):
@@ -243,20 +299,16 @@ def users_view(request):
 def user_profile(request, username):
     profile_user = get_object_or_404(User, username=username)
 
-    q_score_sum = Question.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
-    a_score_sum = Answer.objects.filter(own_user=profile_user).aggregate(Sum('score'))['score__sum'] or 0
-
-    profile_user.reputation = (q_score_sum * 5) + (a_score_sum * 10)
-
     likes = Vote.objects.filter(question__own_user=profile_user, value=1).count() + \
             Vote.objects.filter(answer__own_user=profile_user, value=1).count()
 
     dislikes = Vote.objects.filter(question__own_user=profile_user, value=-1).count() + \
                Vote.objects.filter(answer__own_user=profile_user, value=-1).count()
 
+    # Cập nhật vào database
     profile_user.likes_count = likes
     profile_user.dislikes_count = dislikes
-    profile_user.save()
+    profile_user.save(update_fields=['likes_count', 'dislikes_count'])  # Lưu cụ thể 2 trường này
 
     user_questions = Question.objects.filter(own_user=profile_user).order_by('-creation_date')
 
@@ -279,7 +331,8 @@ def question_page(request):
     context = {'questions': questions,
                'user_count': user_count,
                'question_count': question_count,
-               'tagcount': tag_count
+               'tagcount': tag_count,
+
                }
     return render(request, 'app/question-list.html', context)
 
@@ -548,18 +601,25 @@ def toggle_hide_answer(request, id):
     return redirect('question_detail', id=answer.question.id)
 
 
+
 @login_required
 def accept_answer(request, id):
     answer = get_object_or_404(Answer, id=id)
     question = answer.question
+
     if request.user != question.own_user:
         return redirect('question_detail', id=question.id)
 
+    # Gộp logic xử lý database và tính điểm vào một chỗ
     if question.accepted_answer == answer:
         question.accepted_answer = None
+        question.save()
+        cap_nhat_reputation_he_thong(answer.own_user, 'unaccept')
     else:
         question.accepted_answer = answer
-    question.save()
+        question.save()
+        cap_nhat_reputation_he_thong(answer.own_user, 'accept', nguoi_thuc_hien=request.user)
+
     return redirect('question_detail', id=question.id)
 
 
@@ -586,21 +646,20 @@ def search_similar_questions(request):
 @login_required
 def manage_account(request):
     user = request.user
+
+    # Tính toán lại trước khi hiển thị
+    user.likes_count = Vote.objects.filter(question__own_user=user, value=1).count() + \
+                       Vote.objects.filter(answer__own_user=user, value=1).count()
+    user.dislikes_count = Vote.objects.filter(question__own_user=user, value=-1).count() + \
+                          Vote.objects.filter(answer__own_user=user, value=-1).count()
+    user.save(update_fields=['likes_count', 'dislikes_count'])
+
     user_questions = Question.objects.filter(own_user=user).order_by('-creation_date')
 
-    if request.method == 'POST':
-        new_email = request.POST.get('email')
-        if new_email:
-            user.email = new_email
-            user.save()
-            messages.success(request, "Cập nhật thông tin thành công!")
-            return redirect('manage_account')
-
-    context = {
+    return render(request, 'app/ManageUser.html', {
         'profile_user': user,
         'user_questions': user_questions,
-    }
-    return render(request, 'app/ManageUser.html', context)
+    })
 
 
 @login_required(login_url='login')
@@ -659,30 +718,36 @@ def toggle_lock_question(request, question_id):
 
 
 @login_required(login_url='login')
+
 def vote(request, content_type, content_id, vote_type):
     if not request.user.is_authenticated:
         return redirect('login')
 
-
     model = Question if content_type == 'question' else Answer
     obj = get_object_or_404(model, id=content_id)
-
-
     value = 1 if vote_type == 'up' else -1
-
 
     existing_vote = obj.votes.filter(user=request.user).first()
 
     if existing_vote:
         if existing_vote.value == value:
-
+            # Người dùng bấm lại nút cũ -> Xóa vote (Hủy vote)
             existing_vote.delete()
         else:
+
             existing_vote.value = value
             existing_vote.save()
+
     else:
+        # CHỈ CỘNG ĐIỂM KHI VOTE MỚI HOÀN TOÀN
         obj.votes.create(user=request.user, value=value)
 
+        if value == 1:
+            hanh_dong = 'up_q' if content_type == 'question' else 'up_a'
+            cap_nhat_reputation_he_thong(obj.own_user, hanh_dong)
+        else:
+            hanh_dong = 'down_q' if content_type == 'question' else 'down_a'
+            cap_nhat_reputation_he_thong(obj.own_user, hanh_dong, nguoi_thuc_hien=request.user)
 
     question_id = obj.id if content_type == 'question' else obj.question.id
     return redirect('question_detail', id=question_id)
@@ -698,3 +763,8 @@ def edit_tag(request, tag_id):
         return redirect('admin_tag')
 
     return render(request, 'app/edit_tag.html', {'tag': tag})
+
+def del_question_user(request, id):
+    question = get_object_or_404(Question, id=id)
+    question.delete()
+    return redirect('manage_account')

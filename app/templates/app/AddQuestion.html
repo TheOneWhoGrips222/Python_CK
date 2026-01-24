@@ -82,6 +82,12 @@
         <div class="main-content" style="grid-column: 1 / span 2;">
             <h1 style="margin-bottom: 30px;">Đặt một câu hỏi công khai</h1>
 
+            {% if error %}
+                <div style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border: 1px solid #f5c6cb; border-radius: 4px;">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                </div>
+            {% endif %}
+
             <form id="question-form" method="post" style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #e3e6e8; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 {% csrf_token %}
 
@@ -90,14 +96,15 @@
                     <small style="display: block; margin-bottom: 8px; color: #6a737c;">Hãy cụ thể và hình dung như bạn đang hỏi một người khác.</small>
                     <input type="text" id="id_title" name="title" class="form-control" autocomplete="off"
                            placeholder="Ví dụ: Làm sao để chuyển String thành Int trong Python?" required
-                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px; box-sizing: border-box;">
+                           style="width: 100%; padding: 10px; border: 1px solid #babfc4; border-radius: 4px; box-sizing: border-box;"
+                           value="{{old_title|default:'' }}">
                     <div id="suggestions" class="suggestions-box"></div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="font-weight: bold; display: block; margin-bottom: 5px;">Nội dung chi tiết</label>
                     <div id="editor-wrapper" style="background: white;">
-                        <div id="editor"></div>
+                        <div id="editor">{{ old_body|safe }}</div>
                     </div>
                     <input type="hidden" name="body" id="bodyInput">
                 </div>
