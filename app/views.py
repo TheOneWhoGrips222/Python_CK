@@ -15,16 +15,11 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .ai_search import find_similar_questions_ai
-<<<<<<< HEAD
 from .ai_tagging import suggest_tags_ai
 import html
 from django.utils.html import strip_tags
-=======
 import datetime
-from django.db.models import Count
 
-
->>>>>>> 14121f544dc30d8d5160438ebd901acfc62a6d25
 User = get_user_model()
 
 class SignUpForm(UserCreationForm):
@@ -134,6 +129,13 @@ def add_question(request):
         if not title or not body:
             return render(request, 'app/AddQuestion.html', {"error": "Vui lòng nhập tiêu đề và nội dung."})
 
+        if Question.objects.filter(title__iexact=title).exists():
+            return render(request, 'app/AddQuestion.html',{
+                "error": "Câu hỏi này đã tồn tại trên hệ thống. Vui lòng sử dụng tính năng tìm kiếm hoặc đặt một tiêu đề khác.",
+                "old_title": title,
+                "old_body": body,
+            })
+
         # 1) Tạo câu hỏi trước
         question = Question.objects.create(
             title=title,
@@ -167,7 +169,7 @@ def add_question(request):
             if t and t not in merged:
                 merged.append(t)
 
-        # ✅ số tag tối đa lưu/hiển thị (bạn muốn nhiều hơn 5 thì tăng lên)
+        # số tag tối đa lưu/hiển thị (bạn muốn nhiều hơn 5 thì tăng lên)
         MAX_TAGS = 5
         merged = merged[:MAX_TAGS]
 
@@ -313,7 +315,6 @@ def admin_dashboard(request):
         'question_count': question_count,
         'answer_count': answer_count,
         'report_count': report_count,
-        'tag_count': tag_count,
         'days': days,
         'counts': counts,
         'resp_days': resp_days,
@@ -405,7 +406,6 @@ def delete_admin_question(request, id):
 def toggle_staff(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
-
     if user.is_staff == True:
         user.is_staff = False
         messages.success(request, f"Đã hạ cấp quyền Staff của {user.username}")
@@ -463,16 +463,13 @@ def admin_answer(request):
         if follow_val == 'USER':
             answer_list = answer_list.filter(own_user__username__icontains=search_val)
 
-
-    # 4. Logic Lọc trạng thái (Dùng cách này để không bị lỗi FieldError)
+    # 4. Logic Lọc trạng thái
     if status_val == 'hidden':
 
         answer_list = answer_list.filter(is_hidden=True)
     elif status_val == 'active':
 
         answer_list = answer_list.filter(is_hidden=False)
-
-
 
     # 5. Sắp xếp
     answer_list = answer_list.order_by('creation_date' if time_val == 'old' else '-creation_date')
@@ -584,20 +581,15 @@ def search_similar_questions(request):
 def manage_account(request):
 
     user = request.user
-
-
     user_questions = Question.objects.filter(own_user=user).order_by('-creation_date')
 
-
     if request.method == 'POST':
-
         new_email = request.POST.get('email')
         if new_email:
             user.email = new_email
             user.save()
             messages.success(request, "Cập nhật thông tin thành công!")
             return redirect('manage_account')
-
     context = {
         'profile_user': user,
         'user_questions': user_questions,
