@@ -96,7 +96,18 @@
                 {% for q in user_questions %}
                 <div class="q-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f2f3;">
                     <div class="q-info">
-                        <a href="{% url 'question_detail' q.id %}" class="q-title" style="color: #0074cc; text-decoration: none; font-weight: 500;">{{ q.title }}</a>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <a href="{% url 'question_detail' q.id %}" class="q-title" style="color: #0074cc; text-decoration: none; font-weight: 500;">{{ q.title }}</a>
+
+                            {% if request.user == profile_user %}
+                            <a href="{% url 'delete_question' q.id %}"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')"
+                               style="color: #dc3545; font-size: 0.9rem; text-decoration: none;"
+                               title="Xóa câu hỏi">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            {% endif %}
+                        </div>
                         <div class="q-meta" style="font-size: 0.8rem; color: #6a737c; margin-top: 5px;">
                             Đã hỏi: {{ q.creation_date|date:"H:i d/m/Y" }} • {{ q.view_count }} lượt xem
                         </div>

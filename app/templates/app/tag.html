@@ -65,10 +65,11 @@
     <h1 class="page-title" style="font-size: 1.8rem; margin-bottom: 0.5rem;">Thẻ nổi bật</h1>
     <p style="color: #6a737c; margin-bottom: 2rem;">Mỗi thẻ đại diện cho một chủ đề quan tâm.</p>
 
-    <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%; border: 1px solid #babfc4; padding: 8px; border-radius: 4px; display: flex; align-items: center; background: white;">
+    <form method="GET" action="{% url 'tags' %}" class="search-bar" style="margin-bottom: 1.5rem; width: 100%; border: 1px solid #babfc4; padding: 8px; border-radius: 4px; display: flex; align-items: center; background: white;">
         <i class="fa-solid fa-magnifying-glass" style="margin-right: 10px; color: #888;"></i>
-        <input type="text" placeholder="Lọc theo tên thẻ..." style="border: none; outline: none; width: 100%;">
-    </div>
+        <input name="search" type="text" placeholder="Lọc theo tên thẻ..." value="{{ query|default:'' }}" style="border: none; outline: none; width: 100%;">
+        <button type="submit" style="display:none;"></button>
+    </form>
 
     <div class="tags-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
         {% for tag in tags %}
@@ -98,19 +99,19 @@
     <div class="pagination-container" style="margin-top: 30px; display: flex; justify-content: center;">
         <div class="pagination" style="display: flex; gap: 5px; flex-wrap: wrap;">
             {% if tags.has_previous %}
-                <a href="?page=1" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">&laquo; Đầu</a>
+                <a href="?search={{ query }}&page=1" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">&laquo; Đầu</a>
             {% endif %}
 
             {% for num in tags.paginator.page_range %}
                 {% if tags.number == num %}
                     <span class="page-current" style="padding: 5px 10px; background: #f48225; color: white; border-radius: 4px;">{{ num }}</span>
                 {% elif num > tags.number|add:'-3' and num < tags.number|add:'3' %}
-                    <a href="?page={{ num }}" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">{{ num }}</a>
+                    <a href="?search={{ query }}&page={{ num }}" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">{{ num }}</a>
                 {% endif %}
             {% endfor %}
 
             {% if tags.has_next %}
-                <a href="?page={{ tags.next_page_number }}" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">Sau</a>
+                <a href="?search={{ query }}&page={{ tags.next_page_number }}" class="page-link" style="padding: 5px 10px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px;">Sau</a>
             {% endif %}
         </div>
     </div>
