@@ -14,7 +14,6 @@
         .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Nút Vote giữ nguyên Style bạn muốn nhưng thêm hiệu ứng Active */
         .vote-btn-pro {
             text-decoration: none;
             display: inline-flex;
@@ -28,11 +27,8 @@
             border: 1px solid #e3e6e8;
         }
 
-        /* Khi đã ấn (Active) */
         .vote-btn-pro.like:hover, .vote-btn-pro.like.active { color: #28a745; background: #e8f5e9; border-color: #28a745; }
         .vote-btn-pro.dislike:hover, .vote-btn-pro.dislike.active { color: #dc3545; background: #fdf2f2; border-color: #dc3545; }
-
-        /* Hiệu ứng ấn xuống */
         .vote-btn-pro:active { transform: scale(0.95); }
 
         .score-display { font-weight: bold; color: #212529; margin-left: 10px; font-size: 14px; background: #eee; padding: 4px 10px; border-radius: 4px; }
@@ -44,9 +40,13 @@
         .btn-accept-link { color: #6a737c; text-decoration: none; font-size: 13px; margin-right: 15px; transition: 0.2s; }
         .btn-accept-link:hover { color: #28a745; }
 
-        /* Style bổ sung cho info user */
         .user-info-small { font-size: 13px; color: #0074cc; font-weight: 500; text-decoration: none; }
         .user-info-small:hover { text-decoration: underline; }
+
+        /* Style cho ô textarea trả lời */
+        .answer-input-area { width: 100%; border: 1px solid #e3e6e8; border-radius: 4px; padding: 15px; font-size: 15px; line-height: 1.6; min-height: 200px; resize: vertical; margin-bottom: 15px; }
+        .btn-submit-answer { background-color: #0074cc; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        .btn-submit-answer:hover { background-color: #0059a3; }
     </style>
 </head>
 <body>
@@ -182,10 +182,51 @@
                             </div>
                         </div>
                     </div>
+                {% empty %}
+                    <p style="color: #6a737c; margin-bottom: 30px;">Chưa có câu trả lời nào. Hãy là người đầu tiên giúp đỡ!</p>
                 {% endfor %}
+
+                {% if answers.has_other_pages %}
+                <div class="pagination">
+                    {% if answers.has_previous %}
+                        <a href="?page={{ answers.previous_page_number }}" class="btn-page">Trước</a>
+                    {% endif %}
+                    {% for num in answers.paginator.page_range %}
+                        <a href="?page={{ num }}" class="btn-page {% if answers.number == num %}active{% endif %}">{{ num }}</a>
+                    {% endfor %}
+                    {% if answers.has_next %}
+                        <a href="?page={{ answers.next_page_number }}" class="btn-page">Sau</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </section>
 
-            </main>
+            <section class="post-answer-section" style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e3e6e8;">
+                {% if not question.accepted_answer %}
+                    {% if request.user.is_authenticated %}
+                        <h3 style="margin-bottom: 20px;">Câu trả lời của bạn</h3>
+                        <form action="{% url 'question_detail' question.id %}" method="POST">
+                            {% csrf_token %}
+                            <textarea name="content" class="answer-input-area" placeholder="Nhập nội dung câu trả lời của bạn tại đây..." required></textarea>
+                            <button type="submit" class="btn-submit-answer">Đăng câu trả lời</button>
+                        </form>
+                    {% else %}
+                        <div style="background-color: #fdf7e3; border: 1px solid #e6dbb9; padding: 20px; border-radius: 4px; text-align: center;">
+                            Vui lòng <a href="{% url 'login' %}" style="color: #0074cc; font-weight: bold;">đăng nhập</a> để tham gia trả lời câu hỏi này.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #2e7d32; padding: 20px; border-radius: 4px; display: flex; align-items: center; gap: 15px;">
+                        <i class="fas fa-lock" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong style="display: block;">Câu hỏi đã được đóng</strong>
+                            <span style="font-size: 14px;">Câu hỏi này đã có câu trả lời hay nhất nên tính năng trả lời mới đã được tạm khóa.</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+
+        </main>
 
         <aside class="right-sidebar">
             <div class="widget" style="border: 1px solid #e3e6e8; padding: 15px; border-radius: 4px;">
